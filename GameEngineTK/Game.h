@@ -4,10 +4,11 @@
 
 #pragma once
 
+#include "DebugCamera.h"
 #include "StepTimer.h"
 #include <CommonStates.h>
 #include <Effects.h>
-#include "DebugCamera.h"
+#include <Model.h>
 #include <PrimitiveBatch.h>
 #include <SimpleMath.h>
 #include <VertexTypes.h>
@@ -80,4 +81,8 @@ private:
 	DirectX::SimpleMath::Matrix m_proj;
 
 	std::unique_ptr<DebugCamera> m_debugCamera;
+
+	std::unique_ptr<DirectX::EffectFactory> m_factory;
+	std::unique_ptr<DirectX::Model> m_modelSkydome;
+	std::unique_ptr<DirectX::Model> m_modelGround;
 };

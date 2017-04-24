@@ -57,6 +57,15 @@ void Game::Initialize(HWND window, int width, int height)
 	m_world = Matrix::Identity;
 
 	m_debugCamera = std::make_unique<DebugCamera>(m_outputWidth, m_outputHeight);
+
+	m_factory = std::make_unique<EffectFactory>(m_d3dDevice.Get());
+
+	//ファイルの読み込みパスを指定
+	m_factory->SetDirectory(L"Resources");
+
+	// モデルの読み込み
+	m_modelSkydome = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources\\skydome.cmo", *m_factory);
+	m_modelGround = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources\\ground1m.cmo", *m_factory);
 }
 
 // Executes the basic game loop.
@@ -119,13 +128,18 @@ void Game::Render()
 	// 最初の引数は写す角度
 	// 最後の２つの引数は描画する範囲　一番近い座標と一番遠い座標
 	m_proj = Matrix::CreatePerspectiveFieldOfView(XM_PI / 4.f,
-		float(m_outputWidth) / float(m_outputHeight), 0.1f, 10.f);
+		float(m_outputWidth) / float(m_outputHeight), 0.1f, 200.f);
 
 	m_effect->SetView(m_view);
 	m_effect->SetProjection(m_proj);
 
 	m_effect->Apply(m_d3dContext.Get());
 	m_d3dContext->IASetInputLayout(m_inputLayout.Get());
+
+	// 天球の描画
+	m_modelSkydome->Draw(m_d3dContext.Get(), *m_states, m_world, m_view, m_proj);
+	// 地面の描画
+	m_modelGround->Draw(m_d3dContext.Get(), *m_states, m_world, m_view, m_proj);
 	
 	m_batch->Begin();
 
