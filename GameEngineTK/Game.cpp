@@ -66,6 +66,15 @@ void Game::Initialize(HWND window, int width, int height)
 	// モデルの読み込み
 	m_modelSkydome = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources\\skydome.cmo", *m_factory);
 	m_modelGround = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources\\ground1m.cmo", *m_factory);
+	m_modelSphere = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources\\sphere.cmo", *m_factory);
+
+	m_angle = 0.0f;
+
+	for (int i = 0; i < 40000; i++)
+	{
+		// 地面のワールド行列の計算
+		m_worldGround[i] = Matrix::CreateTranslation(i % 200 - 100, 0, i / 200 - 100);
+	}
 }
 
 // Executes the basic game loop.
@@ -88,6 +97,32 @@ void Game::Update(DX::StepTimer const& timer)
     elapsedTime;
 	// ゲームの毎フレーム処理
 	m_debugCamera->Update();
+	
+	// 球のワールド行列の計算
+	Matrix scalemat = Matrix::CreateScale(0.5f);
+	Matrix transmat;
+	Matrix rotmatY;
+
+	// 角度を変える
+	m_angle += 1.0f;
+
+	for (int i = 0; i < 20; i++)
+	{
+		transmat = Matrix::CreateTranslation(10.0f * (i / 10 + 1), 0.0f, 0.0f);
+		// 内側を回る球
+		if (i < 10)
+		{
+			// 反時計回りの回転
+			rotmatY = Matrix::CreateRotationY(XMConvertToRadians(36.0f * i + m_angle));
+		}
+		// 外側を回る球
+		else
+		{
+			// 時計回りの回転
+			rotmatY = Matrix::CreateRotationY(XMConvertToRadians(36.0f * i + -m_angle));
+		}
+		m_worldSphere[i] = scalemat * transmat * rotmatY;
+	}
 }
 
 // Draws the scene.
@@ -138,9 +173,19 @@ void Game::Render()
 
 	// 天球の描画
 	m_modelSkydome->Draw(m_d3dContext.Get(), *m_states, m_world, m_view, m_proj);
-	// 地面の描画
-	m_modelGround->Draw(m_d3dContext.Get(), *m_states, m_world, m_view, m_proj);
-	
+
+	for (int i = 0; i < 40000; i++)
+	{
+		// 地面の描画
+		m_modelGround->Draw(m_d3dContext.Get(), *m_states, m_worldGround[i], m_view, m_proj);
+	}
+
+	for (int i = 0; i < 20; i++)
+	{
+		// 球の描画
+		m_modelSphere->Draw(m_d3dContext.Get(), *m_states, m_worldSphere[i], m_view, m_proj);
+	}
+
 	m_batch->Begin();
 
 	//m_batch->DrawLine(VertexPositionColor(Vector3(0.0f, 0.0f, 0.0f), Color(1.0f, 1.0f, 1.0f)),

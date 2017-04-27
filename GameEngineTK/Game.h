@@ -85,4 +85,11 @@ private:
 	std::unique_ptr<DirectX::EffectFactory> m_factory;
 	std::unique_ptr<DirectX::Model> m_modelSkydome;
 	std::unique_ptr<DirectX::Model> m_modelGround;
+	std::unique_ptr<DirectX::Model> m_modelSphere;
+	// 球用のワールド行列
+	DirectX::SimpleMath::Matrix m_worldSphere[20];
+	// 球用の角度
+	float m_angle;
+	// 地面用のワールド行列
+	DirectX::SimpleMath::Matrix m_worldGround[40000];
 };
