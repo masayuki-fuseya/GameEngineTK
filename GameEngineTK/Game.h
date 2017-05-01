@@ -20,55 +20,59 @@ class Game
 {
 public:
 
-    Game();
+	Game();
 
-    // Initialization and management
-    void Initialize(HWND window, int width, int height);
+	// Initialization and management
+	void Initialize(HWND window, int width, int height);
 
-    // Basic game loop
-    void Tick();
+	// Basic game loop
+	void Tick();
 
-    // Messages
-    void OnActivated();
-    void OnDeactivated();
-    void OnSuspending();
-    void OnResuming();
-    void OnWindowSizeChanged(int width, int height);
+	// Messages
+	void OnActivated();
+	void OnDeactivated();
+	void OnSuspending();
+	void OnResuming();
+	void OnWindowSizeChanged(int width, int height);
 
-    // Properties
-    void GetDefaultSize( int& width, int& height ) const;
+	// Properties
+	void GetDefaultSize(int& width, int& height) const;
 
 private:
 
-    void Update(DX::StepTimer const& timer);
-    void Render();
+	void Update(DX::StepTimer const& timer);
+	void Render();
 
-    void Clear();
-    void Present();
+	void Clear();
+	void Present();
 
-    void CreateDevice();
-    void CreateResources();
+	void CreateDevice();
+	void CreateResources();
 
-    void OnDeviceLost();
+	void OnDeviceLost();
 
-    // Device resources.
-    HWND                                            m_window;
-    int                                             m_outputWidth;
-    int                                             m_outputHeight;
+	// cos補間
+	DirectX::SimpleMath::Matrix Lerp(float startScale, float targetScale, float t);
+	float cosCurve(float time);
 
-    D3D_FEATURE_LEVEL                               m_featureLevel;
-    Microsoft::WRL::ComPtr<ID3D11Device>            m_d3dDevice;
-    Microsoft::WRL::ComPtr<ID3D11Device1>           m_d3dDevice1;
-    Microsoft::WRL::ComPtr<ID3D11DeviceContext>     m_d3dContext;
-    Microsoft::WRL::ComPtr<ID3D11DeviceContext1>    m_d3dContext1;
+	// Device resources.
+	HWND                                            m_window;
+	int                                             m_outputWidth;
+	int                                             m_outputHeight;
 
-    Microsoft::WRL::ComPtr<IDXGISwapChain>          m_swapChain;
-    Microsoft::WRL::ComPtr<IDXGISwapChain1>         m_swapChain1;
-    Microsoft::WRL::ComPtr<ID3D11RenderTargetView>  m_renderTargetView;
-    Microsoft::WRL::ComPtr<ID3D11DepthStencilView>  m_depthStencilView;
+	D3D_FEATURE_LEVEL                               m_featureLevel;
+	Microsoft::WRL::ComPtr<ID3D11Device>            m_d3dDevice;
+	Microsoft::WRL::ComPtr<ID3D11Device1>           m_d3dDevice1;
+	Microsoft::WRL::ComPtr<ID3D11DeviceContext>     m_d3dContext;
+	Microsoft::WRL::ComPtr<ID3D11DeviceContext1>    m_d3dContext1;
 
-    // Rendering loop timer.
-    DX::StepTimer                                   m_timer;
+	Microsoft::WRL::ComPtr<IDXGISwapChain>          m_swapChain;
+	Microsoft::WRL::ComPtr<IDXGISwapChain1>         m_swapChain1;
+	Microsoft::WRL::ComPtr<ID3D11RenderTargetView>  m_renderTargetView;
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilView>  m_depthStencilView;
+
+	// Rendering loop timer.
+	DX::StepTimer                                   m_timer;
 
 	std::unique_ptr<DirectX::CommonStates> m_states;
 	//std::unique_ptr<DirectX::PrimitiveBatch<DirectX::VertexPositionColor>> m_batch;
@@ -86,10 +90,20 @@ private:
 	std::unique_ptr<DirectX::Model> m_modelSkydome;
 	std::unique_ptr<DirectX::Model> m_modelGround;
 	std::unique_ptr<DirectX::Model> m_modelSphere;
+	std::unique_ptr<DirectX::Model> m_modelTeapot;
 	// 球用のワールド行列
 	DirectX::SimpleMath::Matrix m_worldSphere[20];
 	// 球用の角度
 	float m_angle;
+	// ティーポットの座標
+	DirectX::SimpleMath::Vector3 m_posTeapot[20];
+	// ティーポットの移動用変数
+	DirectX::SimpleMath::Vector3 m_moveTeapot[20];
+	// ティーポットのワールド行列
+	DirectX::SimpleMath::Matrix m_worldTeapot[20];
 	// 地面用のワールド行列
-	DirectX::SimpleMath::Matrix m_worldGround[40000];
+	//DirectX::SimpleMath::Matrix m_worldGround[40000];
+
+	// 3次補間用の時間
+	float m_time;
 };

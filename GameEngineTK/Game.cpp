@@ -65,16 +65,36 @@ void Game::Initialize(HWND window, int width, int height)
 
 	// モデルの読み込み
 	m_modelSkydome = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources\\skydome.cmo", *m_factory);
-	m_modelGround = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources\\ground1m.cmo", *m_factory);
+	m_modelGround = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources\\ground200m.cmo", *m_factory);
 	m_modelSphere = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources\\sphere.cmo", *m_factory);
+	m_modelTeapot = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources\\teapot.cmo", *m_factory);
 
 	m_angle = 0.0f;
 
-	for (int i = 0; i < 40000; i++)
+	//for (int i = 0; i < 40000; i++)
+	//{
+	//	// 地面のワールド行列の計算
+	//	m_worldGround[i] = Matrix::CreateTranslation(i % 200 - 100, 0, i / 200 - 100);
+	//}
+
+	for (int i = 0; i < 20; i++)
 	{
-		// 地面のワールド行列の計算
-		m_worldGround[i] = Matrix::CreateTranslation(i % 200 - 100, 0, i / 200 - 100);
+		m_posTeapot[i].x = rand() % 100;
+		m_posTeapot[i].z = rand() % 100;
+		int angle = rand() % static_cast<int>(XM_2PI);
+
+		m_posTeapot[i].x = cos(angle) * m_posTeapot[i].x;
+		m_posTeapot[i].z = sin(angle) * m_posTeapot[i].z;
+
+		Matrix transmat = Matrix::CreateTranslation(m_posTeapot[i].x, 0, m_posTeapot[i].z);
+
+		// 10秒で原点に向かうように計算する
+		m_moveTeapot[i] = Vector3(-m_posTeapot[i].x / 600.0f, 0.0f, -m_posTeapot[i].z / 600.0f);
+
+		m_worldTeapot[i] = transmat;
 	}
+
+	m_time = 0.0f;
 }
 
 // Executes the basic game loop.
@@ -98,30 +118,62 @@ void Game::Update(DX::StepTimer const& timer)
 	// ゲームの毎フレーム処理
 	m_debugCamera->Update();
 	
-	// 球のワールド行列の計算
-	Matrix scalemat = Matrix::CreateScale(0.5f);
-	Matrix transmat;
-	Matrix rotmatY;
+	// 球の回転 ////////////////////////////////////////////////////
 
-	// 角度を変える
-	m_angle += 1.0f;
+	//// 球のワールド行列の計算
+	//Matrix scalemat = Matrix::CreateScale(0.5f);
+	//Matrix transmat;
+	//Matrix rotmatY;
 
+	//// 角度を変える
+	//m_angle += 1.0f;
+
+	//for (int i = 0; i < 20; i++)
+	//{
+	//	transmat = Matrix::CreateTranslation(10.0f * (i / 10 + 1), 0.0f, 0.0f);
+	//	// 内側を回る球
+	//	if (i < 10)
+	//	{
+	//		// 反時計回りの回転
+	//		rotmatY = Matrix::CreateRotationY(XMConvertToRadians(36.0f * i + m_angle));
+	//	}
+	//	// 外側を回る球
+	//	else
+	//	{
+	//		// 時計回りの回転
+	//		rotmatY = Matrix::CreateRotationY(XMConvertToRadians(36.0f * i + -m_angle));
+	//	}
+	//	m_worldSphere[i] = scalemat * transmat * rotmatY;
+	//}
+
+	////////////////////////////////////////////////////////////////
+
+	m_angle += 0.5f;
+	m_time += 0.5f / 60.0f;
 	for (int i = 0; i < 20; i++)
 	{
-		transmat = Matrix::CreateTranslation(10.0f * (i / 10 + 1), 0.0f, 0.0f);
-		// 内側を回る球
-		if (i < 10)
+		// 原点に向かう
+		m_posTeapot[i].x += m_moveTeapot[i].x;
+		m_posTeapot[i].z += m_moveTeapot[i].z;
+		// 行き過ぎたら原点に戻す
+		if (m_moveTeapot[i].x < 0.0f && m_posTeapot[i].x < 0.0f ||
+			m_moveTeapot[i].x > 0.0f && m_posTeapot[i].x > 0.0f)
 		{
-			// 反時計回りの回転
-			rotmatY = Matrix::CreateRotationY(XMConvertToRadians(36.0f * i + m_angle));
+			m_posTeapot[i].x = 0.0f;
 		}
-		// 外側を回る球
-		else
+		if (m_moveTeapot[i].z < 0.0f && m_posTeapot[i].z < 0.0f ||
+			m_moveTeapot[i].z > 0.0f && m_posTeapot[i].z > 0.0f)
 		{
-			// 時計回りの回転
-			rotmatY = Matrix::CreateRotationY(XMConvertToRadians(36.0f * i + -m_angle));
+			m_posTeapot[i].z = 0.0f;
 		}
-		m_worldSphere[i] = scalemat * transmat * rotmatY;
+
+		Matrix transmat = Matrix::CreateTranslation(m_posTeapot[i].x, 0.0f, m_posTeapot[i].z);
+
+		Matrix rotmatY = Matrix::CreateRotationY(XMConvertToRadians(m_angle));
+		
+		Matrix scalemat = Lerp(1.0f, 5.0f, m_time);
+		
+		m_worldTeapot[i] = rotmatY * transmat;
 	}
 }
 
@@ -163,7 +215,7 @@ void Game::Render()
 	// 最初の引数は写す角度
 	// 最後の２つの引数は描画する範囲　一番近い座標と一番遠い座標
 	m_proj = Matrix::CreatePerspectiveFieldOfView(XM_PI / 4.f,
-		float(m_outputWidth) / float(m_outputHeight), 0.1f, 200.f);
+		float(m_outputWidth) / float(m_outputHeight), 0.1f, 400.f);
 
 	m_effect->SetView(m_view);
 	m_effect->SetProjection(m_proj);
@@ -173,17 +225,24 @@ void Game::Render()
 
 	// 天球の描画
 	m_modelSkydome->Draw(m_d3dContext.Get(), *m_states, m_world, m_view, m_proj);
-
-	for (int i = 0; i < 40000; i++)
-	{
-		// 地面の描画
-		m_modelGround->Draw(m_d3dContext.Get(), *m_states, m_worldGround[i], m_view, m_proj);
-	}
+	
+	//for (int i = 0; i < 40000; i++)
+	//{
+	//	// 地面の描画
+	//	m_modelGround->Draw(m_d3dContext.Get(), *m_states, m_worldGround[i], m_view, m_proj);
+	//}
+	m_modelGround->Draw(m_d3dContext.Get(), *m_states, m_world, m_view, m_proj);
+	
+	//for (int i = 0; i < 20; i++)
+	//{
+	//	// 球の描画
+	//	m_modelSphere->Draw(m_d3dContext.Get(), *m_states, m_worldSphere[i], m_view, m_proj);
+	//}
 
 	for (int i = 0; i < 20; i++)
 	{
-		// 球の描画
-		m_modelSphere->Draw(m_d3dContext.Get(), *m_states, m_worldSphere[i], m_view, m_proj);
+		// ティーポットの描画
+		m_modelTeapot->Draw(m_d3dContext.Get(), *m_states, m_worldTeapot[i], m_view, m_proj);
 	}
 
 	m_batch->Begin();
@@ -501,4 +560,22 @@ void Game::OnDeviceLost()
     CreateDevice();
 
     CreateResources();
+}
+
+Matrix Game::Lerp(float startScale, float targetScale, float t)
+{
+	Matrix lerpScale = Matrix::Identity;
+
+	lerpScale = Matrix::CreateScale((1 - cosCurve(t)) * startScale + cosCurve(t) * targetScale);
+
+	return lerpScale;
+}
+
+float Game::cosCurve(float time)
+{
+	float vt = 0.0f;
+
+	vt = (1 - cos(time * XM_PI) / 2.0f);
+
+	return vt;
 }
