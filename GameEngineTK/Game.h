@@ -5,6 +5,7 @@
 #pragma once
 
 #include "DebugCamera.h"
+#include "KeyboardUtil.h"
 #include "StepTimer.h"
 #include <CommonStates.h>
 #include <Effects.h>
@@ -91,10 +92,15 @@ private:
 	std::unique_ptr<DirectX::Model> m_modelGround;
 	std::unique_ptr<DirectX::Model> m_modelSphere;
 	std::unique_ptr<DirectX::Model> m_modelTeapot;
+	std::unique_ptr<DirectX::Model> m_modelTank;
 	// 球用のワールド行列
 	DirectX::SimpleMath::Matrix m_worldSphere[20];
 	// 球用の角度
-	float m_angle;
+	float m_angleSphere;
+	// ティーポット用の角度
+	float m_angleTeapot;
+	// タンク用の角度
+	float m_angleTank;
 	// ティーポットの座標
 	DirectX::SimpleMath::Vector3 m_posTeapot[20];
 	// ティーポットの移動用変数
@@ -103,7 +109,13 @@ private:
 	DirectX::SimpleMath::Matrix m_worldTeapot[20];
 	// 地面用のワールド行列
 	//DirectX::SimpleMath::Matrix m_worldGround[40000];
-
+	// タンクの座標
+	DirectX::SimpleMath::Vector3 m_posTank;
+	// タンクのワールド行列
+	DirectX::SimpleMath::Matrix m_worldTank;
+	// キーボード
+	std::unique_ptr<KeyboardUtil> m_keyboard;
+	
 	// 3次補間用の時間
 	float m_time;
 };

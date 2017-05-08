@@ -68,8 +68,11 @@ void Game::Initialize(HWND window, int width, int height)
 	m_modelGround = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources\\ground200m.cmo", *m_factory);
 	m_modelSphere = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources\\sphere.cmo", *m_factory);
 	m_modelTeapot = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources\\teapot.cmo", *m_factory);
+	m_modelTank = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources\\tank.cmo", *m_factory);
 
-	m_angle = 0.0f;
+	m_angleSphere = 0.0f;
+	m_angleTeapot = 0.0f;
+	m_angleTank = 0.0f;
 
 	//for (int i = 0; i < 40000; i++)
 	//{
@@ -93,6 +96,8 @@ void Game::Initialize(HWND window, int width, int height)
 
 		m_worldTeapot[i] = transmat;
 	}
+
+	m_keyboard = std::make_unique<KeyboardUtil>();
 
 	m_time = 0.0f;
 }
@@ -126,7 +131,7 @@ void Game::Update(DX::StepTimer const& timer)
 	//Matrix rotmatY;
 
 	//// 角度を変える
-	//m_angle += 1.0f;
+	//m_angleSphere += 1.0f;
 
 	//for (int i = 0; i < 20; i++)
 	//{
@@ -135,46 +140,90 @@ void Game::Update(DX::StepTimer const& timer)
 	//	if (i < 10)
 	//	{
 	//		// 反時計回りの回転
-	//		rotmatY = Matrix::CreateRotationY(XMConvertToRadians(36.0f * i + m_angle));
+	//		rotmatY = Matrix::CreateRotationY(XMConvertToRadians(36.0f * i + m_angleSphere));
 	//	}
 	//	// 外側を回る球
 	//	else
 	//	{
 	//		// 時計回りの回転
-	//		rotmatY = Matrix::CreateRotationY(XMConvertToRadians(36.0f * i + -m_angle));
+	//		rotmatY = Matrix::CreateRotationY(XMConvertToRadians(36.0f * i + -m_angleSphere));
 	//	}
 	//	m_worldSphere[i] = scalemat * transmat * rotmatY;
 	//}
 
 	////////////////////////////////////////////////////////////////
 
-	m_angle += 0.5f;
-	m_time += 0.5f / 60.0f;
-	for (int i = 0; i < 20; i++)
+	// ティーポットの回転と移動 ////////////////////////////////////
+
+	//m_angleTeapot += 0.5f;
+	//m_time += 0.5f / 60.0f;
+	//for (int i = 0; i < 20; i++)
+	//{
+	//	// 原点に向かう
+	//	m_posTeapot[i].x += m_moveTeapot[i].x;
+	//	m_posTeapot[i].z += m_moveTeapot[i].z;
+	//	// 行き過ぎたら原点に戻す
+	//	if (m_moveTeapot[i].x < 0.0f && m_posTeapot[i].x < 0.0f ||
+	//		m_moveTeapot[i].x > 0.0f && m_posTeapot[i].x > 0.0f)
+	//	{
+	//		m_posTeapot[i].x = 0.0f;
+	//	}
+	//	if (m_moveTeapot[i].z < 0.0f && m_posTeapot[i].z < 0.0f ||
+	//		m_moveTeapot[i].z > 0.0f && m_posTeapot[i].z > 0.0f)
+	//	{
+	//		m_posTeapot[i].z = 0.0f;
+	//	}
+
+	//	Matrix transmat = Matrix::CreateTranslation(m_posTeapot[i].x, 0.0f, m_posTeapot[i].z);
+
+	//	Matrix rotmatY = Matrix::CreateRotationY(XMConvertToRadians(m_angleTeapot));
+	//	
+	//	Matrix scalemat = Lerp(1.0f, 5.0f, m_time);
+	//	
+	//	m_worldTeapot[i] = rotmatY * transmat;
+	//}
+
+	////////////////////////////////////////////////////////////////
+
+	// タンク //////////////////////////////////////////////////////
+	m_keyboard->Update();
+
+	Vector3 moveV = Vector3::Zero;
+	if (m_keyboard->IsPressed(Keyboard::Keys::A))
 	{
-		// 原点に向かう
-		m_posTeapot[i].x += m_moveTeapot[i].x;
-		m_posTeapot[i].z += m_moveTeapot[i].z;
-		// 行き過ぎたら原点に戻す
-		if (m_moveTeapot[i].x < 0.0f && m_posTeapot[i].x < 0.0f ||
-			m_moveTeapot[i].x > 0.0f && m_posTeapot[i].x > 0.0f)
-		{
-			m_posTeapot[i].x = 0.0f;
-		}
-		if (m_moveTeapot[i].z < 0.0f && m_posTeapot[i].z < 0.0f ||
-			m_moveTeapot[i].z > 0.0f && m_posTeapot[i].z > 0.0f)
-		{
-			m_posTeapot[i].z = 0.0f;
-		}
-
-		Matrix transmat = Matrix::CreateTranslation(m_posTeapot[i].x, 0.0f, m_posTeapot[i].z);
-
-		Matrix rotmatY = Matrix::CreateRotationY(XMConvertToRadians(m_angle));
-		
-		Matrix scalemat = Lerp(1.0f, 5.0f, m_time);
-		
-		m_worldTeapot[i] = rotmatY * transmat;
+		// 左回転
+		m_angleTank += 0.01f;
 	}
+	if (m_keyboard->IsPressed(Keyboard::Keys::D))
+	{
+		// 右回転
+		m_angleTank -= 0.01f;
+	}
+	if (m_keyboard->IsPressed(Keyboard::Keys::W))
+	{
+		moveV = Vector3(0.0f, 0.0f, -0.1f);
+		// 移動ベクトルを回転させる
+		moveV = Vector3::TransformNormal(moveV, m_worldTank);
+
+		// 常に前進
+		//moveV = Vector3(sin(m_angleTank) * -0.1f, 0.0f, cos(m_angleTank) * -0.1f);
+	}
+	if (m_keyboard->IsPressed(Keyboard::Keys::S))
+	{
+		moveV = Vector3(0.0f, 0.0f, 0.1f);
+		// 移動ベクトルを回転させる
+		moveV = Vector3::TransformNormal(moveV, m_worldTank);
+
+		// 常に後進
+		//moveV = Vector3(sin(m_angleTank) * 0.1f, 0.0f, cos(m_angleTank) * 0.1f);
+	}
+	m_posTank += moveV;
+		
+	Matrix transmat = Matrix::CreateTranslation(m_posTank);
+	Matrix rotmat = Matrix::CreateRotationY(m_angleTank);
+	m_worldTank = rotmat * transmat;
+
+	////////////////////////////////////////////////////////////////
 }
 
 // Draws the scene.
@@ -209,7 +258,7 @@ void Game::Render()
 	m_d3dContext->RSSetState(m_states->CullNone());
 
 								// カメラ座標, カメラの向き, カメラの回転（ゲームワールドの上向きが３Ｄ上のどこを上にするか）
-	//m_view = Matrix::CreateLookAt(Vector3(2.f, 2.f, 2.f),
+	//m_view = Matrix::CreateLookAt(Vector3(0.f, 10.f, 10.f),
 	//	Vector3::Zero, Vector3::UnitY);
 	m_view = m_debugCamera->GetCameraMatrix();
 	// 最初の引数は写す角度
@@ -239,11 +288,14 @@ void Game::Render()
 	//	m_modelSphere->Draw(m_d3dContext.Get(), *m_states, m_worldSphere[i], m_view, m_proj);
 	//}
 
-	for (int i = 0; i < 20; i++)
-	{
-		// ティーポットの描画
-		m_modelTeapot->Draw(m_d3dContext.Get(), *m_states, m_worldTeapot[i], m_view, m_proj);
-	}
+	//for (int i = 0; i < 20; i++)
+	//{
+	//	// ティーポットの描画
+	//	m_modelTeapot->Draw(m_d3dContext.Get(), *m_states, m_worldTeapot[i], m_view, m_proj);
+	//}
+
+	// タンクの描画
+	m_modelTank->Draw(m_d3dContext.Get(), *m_states, m_worldTank, m_view, m_proj);
 
 	m_batch->Begin();
 
