@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "Camera.h"
 #include "DebugCamera.h"
 #include "KeyboardUtil.h"
 #include "StepTimer.h"
@@ -11,6 +12,7 @@
 #include <Effects.h>
 #include <Model.h>
 #include <PrimitiveBatch.h>
+#include <d3d11.h>
 #include <SimpleMath.h>
 #include <VertexTypes.h>
 
@@ -85,6 +87,7 @@ private:
 	DirectX::SimpleMath::Matrix m_view;
 	DirectX::SimpleMath::Matrix m_proj;
 
+	std::unique_ptr<Camera> m_camera;
 	std::unique_ptr<DebugCamera> m_debugCamera;
 
 	std::unique_ptr<DirectX::EffectFactory> m_factory;

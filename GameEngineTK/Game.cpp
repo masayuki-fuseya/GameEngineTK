@@ -56,6 +56,7 @@ void Game::Initialize(HWND window, int width, int height)
 
 	m_world = Matrix::Identity;
 
+	m_camera = std::make_unique<Camera>(m_outputWidth, m_outputHeight);
 	m_debugCamera = std::make_unique<DebugCamera>(m_outputWidth, m_outputHeight);
 
 	m_factory = std::make_unique<EffectFactory>(m_d3dDevice.Get());
@@ -222,6 +223,20 @@ void Game::Update(DX::StepTimer const& timer)
 	Matrix transmat = Matrix::CreateTranslation(m_posTank);
 	Matrix rotmat = Matrix::CreateRotationY(m_angleTank);
 	m_worldTank = rotmat * transmat;
+	
+	////////////////////////////////////////////////////////////////
+	 
+	// カメラの位置の更新 //////////////////////////////////////////
+
+	// カメラが自機についてくる
+	Vector3 moveCamera(0, 3, 5);
+	moveCamera = Vector3::TransformNormal(moveCamera, m_worldTank);
+	m_camera->SetEyePos(m_posTank + moveCamera);
+	m_camera->SetRefPos(m_posTank);
+
+	m_camera->Update();
+	m_view = m_camera->GetViewMatrix();
+	m_proj = m_camera->GetProjectionMatrix();
 
 	////////////////////////////////////////////////////////////////
 }
@@ -256,15 +271,26 @@ void Game::Render()
 	m_d3dContext->OMSetBlendState(m_states->Opaque(), nullptr, 0xFFFFFFFF);
 	m_d3dContext->OMSetDepthStencilState(m_states->DepthNone(), 0);
 	m_d3dContext->RSSetState(m_states->CullNone());
+	
+	//// カメラの位置
+	//Vector3 eyepos(0.0f, 0.0f, 5.0f);
+	//// どこをみるか
+	//Vector3 refpos = Vector3::Zero;
+	//// 上方向ベクトル
+	//Vector3 upvec(1, -1, 0);
+	//upvec.Normalize();
+	//m_view = Matrix::CreateLookAt(eyepos, refpos, upvec);
+	//m_view = m_debugCamera->GetCameraMatrix();
 
-								// カメラ座標, カメラの向き, カメラの回転（ゲームワールドの上向きが３Ｄ上のどこを上にするか）
-	//m_view = Matrix::CreateLookAt(Vector3(0.f, 10.f, 10.f),
-	//	Vector3::Zero, Vector3::UnitY);
-	m_view = m_debugCamera->GetCameraMatrix();
-	// 最初の引数は写す角度
-	// 最後の２つの引数は描画する範囲　一番近い座標と一番遠い座標
-	m_proj = Matrix::CreatePerspectiveFieldOfView(XM_PI / 4.f,
-		float(m_outputWidth) / float(m_outputHeight), 0.1f, 400.f);
+	//// 垂直方向視野角(上下それぞれ何度まで写すか)
+	//float fovY = XMConvertToRadians(60.0f);
+	//// 画面サイズの比率
+	//float aspect = (float)m_outputWidth / m_outputHeight;
+	//// 手前の表示限界
+	//float nearClip = 0.1f;
+	//// 奥の表示限界
+	//float farClip = 1000.0f;
+	//m_proj = Matrix::CreatePerspectiveFieldOfView(fovY, aspect, nearClip, farClip);
 
 	m_effect->SetView(m_view);
 	m_effect->SetProjection(m_proj);
