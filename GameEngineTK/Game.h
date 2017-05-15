@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "Camera.h"
+#include "FollowCamera.h"
 #include "DebugCamera.h"
 #include "KeyboardUtil.h"
 #include "StepTimer.h"
@@ -87,8 +87,9 @@ private:
 	DirectX::SimpleMath::Matrix m_view;
 	DirectX::SimpleMath::Matrix m_proj;
 
-	std::unique_ptr<Camera> m_camera;
+	std::unique_ptr<FollowCamera> m_camera;
 	std::unique_ptr<DebugCamera> m_debugCamera;
+	// カメラとデバッグカメラを切り替える
 
 	std::unique_ptr<DirectX::EffectFactory> m_factory;
 	std::unique_ptr<DirectX::Model> m_modelSkydome;

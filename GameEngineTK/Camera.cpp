@@ -13,13 +13,21 @@
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
 
+
+//**********************************************************************
+//!	@brief		コンストラクタ
+//!
+//!	@param[in]	横幅,　縦幅
+//!
+//!	@return		なし
+//**********************************************************************
 Camera::Camera(int width, int height)
 {
-	m_eyepos = Vector3(0.0f, 0.0f, 5.0f);
-	m_refpos = Vector3::Zero;
-	m_upvec = Vector3::UnitY;
+	m_eyePos = Vector3(0.0f, 0.0f, 5.0f);
+	m_refPos = Vector3::Zero;
+	m_upVec = Vector3::UnitY;
 	// カメラ座標, カメラの向き, カメラの回転（ゲームワールドの上向きが３Ｄ上のどこを上にするか）
-	m_view = Matrix::CreateLookAt(m_eyepos, m_refpos, m_upvec);
+	m_view = Matrix::CreateLookAt(m_eyePos, m_refPos, m_upVec);
 
 	m_fovY = XMConvertToRadians(60.0f);
 	m_aspect = (float)width / height;
@@ -30,79 +38,171 @@ Camera::Camera(int width, int height)
 
 
 
+//**********************************************************************
+//!	@brief		デストラクタ
+//!
+//!	@param[in]	なし
+//!
+//!	@return		なし
+//**********************************************************************
 Camera::~Camera()
 {
 }
 
 
 
+//**********************************************************************
+//!	@brief		更新処理
+//!
+//!	@param[in]	なし
+//!
+//!	@return		なし
+//**********************************************************************
 void Camera::Update()
 {
-	// ビュー行列の更新
-	m_view = Matrix::CreateLookAt(m_eyepos, m_refpos, m_upvec);
-	// 射影行列の更新
-	m_proj = Matrix::CreatePerspectiveFieldOfView(m_fovY, m_aspect, m_nearClip, m_farClip);
+	// 行列の計算
+	CalcMatrix();
 }
 
 
 
-Matrix Camera::GetViewMatrix()
+//**********************************************************************
+//!	@brief		ビュー行列を取得する
+//!
+//!	@param[in]	なし
+//!
+//!	@return		ビュー行列
+//**********************************************************************
+const Matrix& Camera::GetView()
 {
 	return m_view;
 }
 
 
 
-Matrix Camera::GetProjectionMatrix()
+//**********************************************************************
+//!	@brief		プロジェクション行列を取得する
+//!
+//!	@param[in]	なし
+//!
+//!	@return		プロジェクション行列
+//**********************************************************************
+const Matrix& Camera::GetProjection()
 {
 	return m_proj;
 }
 
 
 
-void Camera::SetEyePos(Vector3 eyePos)
+//**********************************************************************
+//!	@brief		カメラの位置を設定する
+//!
+//!	@param[in]	カメラの位置
+//!
+//!	@return		なし
+//**********************************************************************
+void Camera::SetEyePos(const Vector3& eyePos)
 {
-	m_eyepos = eyePos;
+	m_eyePos = eyePos;
 }
 
 
 
-void Camera::SetRefPos(Vector3 refPos)
+//**********************************************************************
+//!	@brief		カメラの向く方向を設定する
+//!
+//!	@param[in]	カメラの向く方向
+//!
+//!	@return		なし
+//**********************************************************************
+void Camera::SetRefPos(const Vector3& refPos)
 {
-	m_refpos = refPos;
+	m_refPos = refPos;
 }
 
 
 
-void Camera::SetUpVec(Vector3 upVec)
+//**********************************************************************
+//!	@brief		上方向ベクトルを設定する
+//!
+//!	@param[in]	上方向ベクトル
+//!
+//!	@return		なし
+//**********************************************************************
+void Camera::SetUpVec(const Vector3& upVec)
 {
-	m_upvec = upVec;
+	m_upVec = upVec;
 }
 
 
 
-void Camera::SetFovY(float fovY)
+//**********************************************************************
+//!	@brief		垂直方向視野角を設定する
+//!
+//!	@param[in]	垂直方向視野角
+//!
+//!	@return		なし
+//**********************************************************************
+void Camera::SetFovY(const float fovY)
 {
 	m_fovY = fovY;
 }
 
 
 
-void Camera::SetAspect(float aspect)
+//**********************************************************************
+//!	@brief		画面サイズの比率を設定する
+//!
+//!	@param[in]	画面サイズの比率
+//!
+//!	@return		なし
+//**********************************************************************
+void Camera::SetAspect(const float aspect)
 {
 	m_aspect = aspect;
 }
 
 
 
-void Camera::SetNearClip(float nearClip)
+//**********************************************************************
+//!	@brief		手前の表示限界を設定する
+//!
+//!	@param[in]	手前の表示限界の位置
+//!
+//!	@return		なし
+//**********************************************************************
+void Camera::SetNearClip(const float nearClip)
 {
 	m_nearClip = nearClip;
 }
 
 
 
-void Camera::SetFarClip(float farClip)
+//**********************************************************************
+//!	@brief		奥の表示限界を設定する
+//!
+//!	@param[in]	奥の表示限界の位置
+//!
+//!	@return		なし
+//**********************************************************************
+void Camera::SetFarClip(const float farClip)
 {
 	m_farClip = farClip;
+}
+
+
+
+//**********************************************************************
+//!	@brief		行列を計算する
+//!
+//!	@param[in]	なし
+//!
+//!	@return		なし
+//**********************************************************************
+void Camera::CalcMatrix()
+{
+	// ビュー行列の更新
+	m_view = Matrix::CreateLookAt(m_eyePos, m_refPos, m_upVec);
+	// 射影行列の更新
+	m_proj = Matrix::CreatePerspectiveFieldOfView(m_fovY, m_aspect, m_nearClip, m_farClip);
 }

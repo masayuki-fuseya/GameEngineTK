@@ -56,7 +56,7 @@ void Game::Initialize(HWND window, int width, int height)
 
 	m_world = Matrix::Identity;
 
-	m_camera = std::make_unique<Camera>(m_outputWidth, m_outputHeight);
+	m_camera = std::make_unique<FollowCamera>(m_outputWidth, m_outputHeight);
 	m_debugCamera = std::make_unique<DebugCamera>(m_outputWidth, m_outputHeight);
 
 	m_factory = std::make_unique<EffectFactory>(m_d3dDevice.Get());
@@ -229,14 +229,21 @@ void Game::Update(DX::StepTimer const& timer)
 	// カメラの位置の更新 //////////////////////////////////////////
 
 	// カメラが自機についてくる
-	Vector3 moveCamera(0, 3, 5);
-	moveCamera = Vector3::TransformNormal(moveCamera, m_worldTank);
-	m_camera->SetEyePos(m_posTank + moveCamera);
-	m_camera->SetRefPos(m_posTank);
+	//Vector3 moveCamera(0, 1, 3);
+	//moveCamera = Vector3::TransformNormal(moveCamera, m_worldTank);
+	//m_camera->SetEyePos(m_posTank + moveCamera);
+	//m_camera->SetRefPos(m_posTank);
+
+	//m_camera->Update();
+	//m_view = m_camera->GetView();
+	//m_proj = m_camera->GetProjection();
+
+	m_camera->SetTargetPos(m_posTank);
+	m_camera->SetTargetAngle(m_angleTank);
 
 	m_camera->Update();
-	m_view = m_camera->GetViewMatrix();
-	m_proj = m_camera->GetProjectionMatrix();
+	m_view = m_camera->GetView();
+	m_proj = m_camera->GetProjection();
 
 	////////////////////////////////////////////////////////////////
 }

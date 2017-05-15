@@ -163,6 +163,7 @@
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="DebugCamera.h" />
+    <ClInclude Include="FollowCamera.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="KeyboardUtil.h" />
     <ClInclude Include="pch.h" />
@@ -171,6 +172,7 @@
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="DebugCamera.cpp" />
+    <ClCompile Include="FollowCamera.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="KeyboardUtil.cpp" />
     <ClCompile Include="Main.cpp" />
