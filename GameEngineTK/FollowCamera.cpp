@@ -28,6 +28,9 @@ FollowCamera::FollowCamera(int width, int height)
 {
 	m_targetPos = Vector3::Zero;
 	m_targetAngle = 0.0f;
+	m_keyboard = nullptr;
+	m_isTPSViewPoint = true;
+	InitializeTPS();
 }
 
 
@@ -46,6 +49,31 @@ FollowCamera::~FollowCamera()
 
 
 //**********************************************************************
+//!	@brief		TPSカメラの初期化
+//!
+//!	@param[in]	なし
+//!
+//!	@return		なし
+//**********************************************************************
+void FollowCamera::InitializeTPS()
+{
+	Vector3 refPos, eyePos;
+	refPos = m_targetPos + Vector3(0.0f, 2.0f, 0.0f);
+	Vector3 cameraV(0.0f, 0.0f, CAMERA_DISTANCE);
+
+	Matrix rotmat = Matrix::CreateRotationY(m_targetAngle);
+	// ベクトルの回転
+	cameraV = Vector3::TransformNormal(cameraV, rotmat);
+
+	eyePos = refPos + cameraV;
+
+	SetEyePos(eyePos);
+	SetRefPos(refPos);
+}
+
+
+
+//**********************************************************************
 //!	@brief		更新処理
 //!
 //!	@param[in]	なし
@@ -56,14 +84,47 @@ void FollowCamera::Update()
 {
 	Vector3 eyePos, refPos;
 
-	refPos = m_targetPos + Vector3(0.0f, 2.0f, 0.0f);
-	Vector3 cameraV(0.0f, 0.0f, CAMERA_DISTANCE);
+	if (m_keyboard->IsTriggered(DirectX::Keyboard::Keys::Space))
+	{
+		// フラグを切り替える
+		m_isTPSViewPoint = !m_isTPSViewPoint;
 
-	Matrix rotmat = Matrix::CreateRotationY(m_targetAngle);
-	// ベクトルの回転
-	cameraV = Vector3::TransformNormal(cameraV, rotmat);
+		if (m_isTPSViewPoint)
+		{
+			InitializeTPS();
+		}
+	}
 
-	eyePos = refPos + cameraV;
+	if (m_isTPSViewPoint)
+	{
+		refPos = m_targetPos + Vector3(0.0f, 2.0f, 0.0f);
+		Vector3 cameraV(0.0f, 0.0f, CAMERA_DISTANCE);
+
+		Matrix rotmat = Matrix::CreateRotationY(m_targetAngle);
+		// ベクトルの回転
+		cameraV = Vector3::TransformNormal(cameraV, rotmat);
+
+		eyePos = refPos + cameraV;
+
+		// 視点を現在位置から補間
+		eyePos = m_eyePos + (eyePos - m_eyePos) * 0.05f;
+		// 参照点を現在位置から補間
+		refPos = m_refPos + (refPos - m_refPos) * 0.2f;
+	}
+	else
+	{
+		Vector3 up;
+		up = m_targetPos + Vector3(0.0f, 0.3f, 0.0f);
+
+		Vector3 cameraV(0.0f, 0.0f, -CAMERA_DISTANCE);
+
+		Matrix rotmat = Matrix::CreateRotationY(m_targetAngle);
+		// ベクトルの回転
+		cameraV = Vector3::TransformNormal(cameraV, rotmat);
+		eyePos = up + cameraV * 0.1f;
+
+		refPos = eyePos + cameraV;
+	}
 
 	SetEyePos(eyePos);
 	SetRefPos(refPos);
@@ -97,4 +158,18 @@ void FollowCamera::SetTargetPos(const Vector3& targetPos)
 void FollowCamera::SetTargetAngle(const float targetAngle)
 {
 	m_targetAngle = targetAngle;
+}
+
+
+
+//**********************************************************************
+//!	@brief		キーボードを設定する
+//!
+//!	@param[in]	キーボード
+//!
+//!	@return		なし
+//**********************************************************************
+void FollowCamera::SetKeyboard(KeyboardUtil* keyboard)
+{
+	m_keyboard = keyboard;
 }

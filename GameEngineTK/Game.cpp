@@ -99,6 +99,8 @@ void Game::Initialize(HWND window, int width, int height)
 	}
 
 	m_keyboard = std::make_unique<KeyboardUtil>();
+	// カメラにキーボードをセット
+	m_camera->SetKeyboard(m_keyboard.get());
 
 	m_time = 0.0f;
 }
@@ -193,12 +195,12 @@ void Game::Update(DX::StepTimer const& timer)
 	if (m_keyboard->IsPressed(Keyboard::Keys::A))
 	{
 		// 左回転
-		m_angleTank += 0.01f;
+		m_angleTank += 0.02f;
 	}
 	if (m_keyboard->IsPressed(Keyboard::Keys::D))
 	{
 		// 右回転
-		m_angleTank -= 0.01f;
+		m_angleTank -= 0.02f;
 	}
 	if (m_keyboard->IsPressed(Keyboard::Keys::W))
 	{

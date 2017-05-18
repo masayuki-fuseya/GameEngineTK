@@ -13,6 +13,7 @@
 
 // ヘッダファイルの読み込み ================================================
 #include "Camera.h"
+#include "KeyboardUtil.h"
 
 #include <SimpleMath.h>
 
@@ -24,6 +25,8 @@ private:
 	DirectX::SimpleMath::Vector3 m_targetPos;
 	// 追従対象の角度
 	float m_targetAngle;
+	KeyboardUtil* m_keyboard;
+	bool m_isTPSViewPoint;		// true:TPS　false:FPS
 public:
 	// カメラと自機の距離
 	static const float CAMERA_DISTANCE;
@@ -31,8 +34,11 @@ public:
 	FollowCamera(int width, int height);
 	~FollowCamera();
 
+	void InitializeTPS();
+
 	void Update() override;
 	void SetTargetPos(const DirectX::SimpleMath::Vector3& targetPos);
 	void SetTargetAngle(const float targetAngle);
+	void SetKeyboard(KeyboardUtil* keyboard);
 };
 
