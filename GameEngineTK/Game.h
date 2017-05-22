@@ -6,6 +6,7 @@
 
 #include "FollowCamera.h"
 #include "DebugCamera.h"
+#include "Obj3d.h"
 #include "KeyboardUtil.h"
 #include "StepTimer.h"
 #include <CommonStates.h>
@@ -92,6 +93,7 @@ private:
 	// カメラとデバッグカメラを切り替える
 
 	std::unique_ptr<DirectX::EffectFactory> m_factory;
+
 	std::unique_ptr<DirectX::Model> m_modelSkydome;
 	std::unique_ptr<DirectX::Model> m_modelGround;
 	std::unique_ptr<DirectX::Model> m_modelSphere;
@@ -117,8 +119,11 @@ private:
 	DirectX::SimpleMath::Vector3 m_posTank;
 	// タンクのワールド行列
 	DirectX::SimpleMath::Matrix m_worldTank;
+	DirectX::SimpleMath::Matrix m_worldTank2;
 	// キーボード
 	std::unique_ptr<KeyboardUtil> m_keyboard;
+	// 3Dオブジェクト
+	Obj3d m_obj;
 	
 	// 3次補間用の時間
 	float m_time;

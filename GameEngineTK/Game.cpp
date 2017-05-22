@@ -38,12 +38,22 @@ void Game::Initialize(HWND window, int width, int height)
     m_timer.SetTargetElapsedSeconds(1.0 / 60);
     */
 
+	m_keyboard = std::make_unique<KeyboardUtil>();
+	m_camera = std::make_unique<FollowCamera>(m_outputWidth, m_outputHeight);
+	// カメラにキーボードをセット
+	m_camera->SetKeyboard(m_keyboard.get());
+
+	m_debugCamera = std::make_unique<DebugCamera>(m_outputWidth, m_outputHeight);
+
+	Obj3d::InitializeStatic(m_camera.get(), m_d3dDevice, m_d3dContext);
+
 	m_states = std::make_unique<CommonStates>(m_d3dDevice.Get());
 	//m_batch = std::make_unique<PrimitiveBatch<VertexPositionColor>>(m_d3dContext.Get());
 	m_batch = std::make_unique<PrimitiveBatch<VertexPositionNormal>>(m_d3dContext.Get());
 	m_effect = std::make_unique<BasicEffect>(m_d3dDevice.Get());
 
-	m_effect->SetProjection(XMMatrixOrthographicOffCenterRH(0, m_outputWidth, m_outputHeight, 0, 0, 1));
+	m_effect->SetProjection(XMMatrixOrthographicOffCenterRH(0.0f,
+		static_cast<float>(m_outputWidth), static_cast<float>(m_outputHeight), 0.0f, 0.0f, 1.0f));
 	m_effect->SetVertexColorEnabled(true);
 
 	void const* shaderBateCode;
@@ -55,9 +65,6 @@ void Game::Initialize(HWND window, int width, int height)
 		shaderBateCode, byteCodeLength, m_inputLayout.GetAddressOf());
 
 	m_world = Matrix::Identity;
-
-	m_camera = std::make_unique<FollowCamera>(m_outputWidth, m_outputHeight);
-	m_debugCamera = std::make_unique<DebugCamera>(m_outputWidth, m_outputHeight);
 
 	m_factory = std::make_unique<EffectFactory>(m_d3dDevice.Get());
 
@@ -83,12 +90,12 @@ void Game::Initialize(HWND window, int width, int height)
 
 	for (int i = 0; i < 20; i++)
 	{
-		m_posTeapot[i].x = rand() % 100;
-		m_posTeapot[i].z = rand() % 100;
+		m_posTeapot[i].x = static_cast<float>(rand() % 100);
+		m_posTeapot[i].z = static_cast<float>(rand() % 100);
 		int angle = rand() % static_cast<int>(XM_2PI);
 
-		m_posTeapot[i].x = cos(angle) * m_posTeapot[i].x;
-		m_posTeapot[i].z = sin(angle) * m_posTeapot[i].z;
+		m_posTeapot[i].x = static_cast<float>(cos(angle)) * m_posTeapot[i].x;
+		m_posTeapot[i].z = static_cast<float>(sin(angle)) * m_posTeapot[i].z;
 
 		Matrix transmat = Matrix::CreateTranslation(m_posTeapot[i].x, 0, m_posTeapot[i].z);
 
@@ -97,10 +104,6 @@ void Game::Initialize(HWND window, int width, int height)
 
 		m_worldTeapot[i] = transmat;
 	}
-
-	m_keyboard = std::make_unique<KeyboardUtil>();
-	// カメラにキーボードをセット
-	m_camera->SetKeyboard(m_keyboard.get());
 
 	m_time = 0.0f;
 }
@@ -225,6 +228,9 @@ void Game::Update(DX::StepTimer const& timer)
 	Matrix transmat = Matrix::CreateTranslation(m_posTank);
 	Matrix rotmat = Matrix::CreateRotationY(m_angleTank);
 	m_worldTank = rotmat * transmat;
+
+	Matrix transmat2 = Matrix::CreateTranslation(Vector3(0.0f, 0.4f, 0.0f));
+	m_worldTank2 = transmat2 * m_worldTank;
 	
 	////////////////////////////////////////////////////////////////
 	 
@@ -331,6 +337,7 @@ void Game::Render()
 
 	// タンクの描画
 	m_modelTank->Draw(m_d3dContext.Get(), *m_states, m_worldTank, m_view, m_proj);
+	m_modelTank->Draw(m_d3dContext.Get(), *m_states, m_worldTank2, m_view, m_proj);
 
 	m_batch->Begin();
 
