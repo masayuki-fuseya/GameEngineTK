@@ -51,23 +51,8 @@ void Obj3d::InitializeStatic(Camera* pCamera,
 //!	@return		なし
 //**********************************************************************
 Obj3d::Obj3d()
-	: m_scale(0.0f)
-	, m_rotate(Vector3::Zero)
-	, m_trans(Vector3::Zero)
-	, m_world(Matrix::Identity)
-{
-}
-
-
-
-//**********************************************************************
-//!	@brief		デストラクタ
-//!
-//!	@param[in]	なし
-//!
-//!	@return		なし
-//**********************************************************************
-Obj3d::~Obj3d()
+	: m_scale(1.0f)
+	, m_pObjParent(nullptr)
 {
 }
 
@@ -80,8 +65,10 @@ Obj3d::~Obj3d()
 //!
 //!	@return		なし
 //**********************************************************************
-void Obj3d::LoadModel(const wchar_t * fileName)
+void Obj3d::LoadModel(const wchar_t* fileName)
 {
+	//wchar_t* t = L"Resources\\" + fileName + L".cmo";
+
 	m_model = Model::CreateFromCMO(m_d3dDevice.Get(), fileName, *m_factory);
 }
 
@@ -96,6 +83,19 @@ void Obj3d::LoadModel(const wchar_t * fileName)
 //**********************************************************************
 void Obj3d::Update()
 {
+	Matrix scalemat = Matrix::CreateScale(m_scale);
+	Matrix rotmatZ = Matrix::CreateRotationZ(m_rotation.z);
+	Matrix rotmatX = Matrix::CreateRotationX(m_rotation.x);
+	Matrix rotmatY = Matrix::CreateRotationY(m_rotation.y);
+	Matrix rotmat = rotmatZ * rotmatX * rotmatY;
+	Matrix transmat = Matrix::CreateTranslation(m_translation);
+
+	m_world = scalemat * rotmat * transmat;
+	// 親がいれば親の行列分移動
+	if (m_pObjParent)
+	{
+		m_world *= m_pObjParent->GetWorld();
+	}
 }
 
 
@@ -109,105 +109,8 @@ void Obj3d::Update()
 //**********************************************************************
 void Obj3d::Render()
 {
-	m_d3dContext->OMSetBlendState(m_states->Opaque(), nullptr, 0xFFFFFFFF);
-	m_d3dContext->OMSetDepthStencilState(m_states->DepthNone(), 0);
-	m_d3dContext->RSSetState(m_states->CullNone());
-}
-
-
-
-//**********************************************************************
-//!	@brief		スケールを設定する
-//!
-//!	@param[in]	スケール
-//!
-//!	@return		なし
-//**********************************************************************
-void Obj3d::SetScale(float scale)
-{
-	m_scale = scale;
-}
-
-
-
-//**********************************************************************
-//!	@brief		回転角を設定する
-//!
-//!	@param[in]	回転角
-//!
-//!	@return		なし
-//**********************************************************************
-void Obj3d::SetRotate(DirectX::SimpleMath::Vector3 rotate)
-{
-	m_rotate = rotate;
-}
-
-
-
-//**********************************************************************
-//!	@brief		平行移動を設定する
-//!
-//!	@param[in]	平行移動
-//!
-//!	@return		なし
-//**********************************************************************
-void Obj3d::SetTrans(DirectX::SimpleMath::Vector3 trans)
-{
-	m_trans = trans;
-}
-
-
-
-//**********************************************************************
-//!	@brief		スケールを取得する
-//!
-//!	@param[in]	なし
-//!
-//!	@return		スケール
-//**********************************************************************
-float Obj3d::GetScale()
-{
-	return m_scale;
-}
-
-
-
-//**********************************************************************
-//!	@brief		回転角を取得する
-//!
-//!	@param[in]	なし
-//!
-//!	@return		回転角
-//**********************************************************************
-Vector3 Obj3d::GetRotate()
-{
-	return m_rotate;
-}
-
-
-
-//**********************************************************************
-//!	@brief		スケールを取得する
-//!
-//!	@param[in]	なし
-//!
-//!	@return		スケール
-//**********************************************************************
-Vector3 Obj3d::GetTrans()
-{
-	return m_trans;
-}
-
-
-
-//**********************************************************************
-//!	@brief		ワールド行列を取得する
-//!
-//!	@param[in]	なし
-//!
-//!	@return		ワールド行列
-//**********************************************************************
-Matrix Obj3d::GetWorld()
-{
-	return m_world;
+	if (m_model)
+	{
+		m_model->Draw(m_d3dContext.Get(), *m_states, m_world, m_pCamera->GetView(), m_pCamera->GetProjection());
+	}
 }

@@ -15,6 +15,7 @@
 #include <PrimitiveBatch.h>
 #include <d3d11.h>
 #include <SimpleMath.h>
+#include <vector>
 #include <VertexTypes.h>
 
 
@@ -23,6 +24,14 @@
 class Game
 {
 public:
+
+	enum PLAYER_PARTS
+	{
+		PLAYER_PARTS_TANK,
+		PLAYER_PARTS_BATTERY,
+
+		PLAYER_PARTS_NUM	// 全体の数
+	};
 
 	Game();
 
@@ -94,11 +103,14 @@ private:
 
 	std::unique_ptr<DirectX::EffectFactory> m_factory;
 
-	std::unique_ptr<DirectX::Model> m_modelSkydome;
-	std::unique_ptr<DirectX::Model> m_modelGround;
+
+	Obj3d m_objSkydome;
+	Obj3d m_objGround;
+	// 自機のオブジェクト
+	std::vector<Obj3d> m_objPlayer;
+
 	std::unique_ptr<DirectX::Model> m_modelSphere;
 	std::unique_ptr<DirectX::Model> m_modelTeapot;
-	std::unique_ptr<DirectX::Model> m_modelTank;
 	// 球用のワールド行列
 	DirectX::SimpleMath::Matrix m_worldSphere[20];
 	// 球用の角度
@@ -122,8 +134,6 @@ private:
 	DirectX::SimpleMath::Matrix m_worldTank2;
 	// キーボード
 	std::unique_ptr<KeyboardUtil> m_keyboard;
-	// 3Dオブジェクト
-	Obj3d m_obj;
 	
 	// 3次補間用の時間
 	float m_time;

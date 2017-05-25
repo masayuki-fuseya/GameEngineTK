@@ -72,11 +72,18 @@ void Game::Initialize(HWND window, int width, int height)
 	m_factory->SetDirectory(L"Resources");
 
 	// モデルの読み込み
-	m_modelSkydome = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources\\skydome.cmo", *m_factory);
-	m_modelGround = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources\\ground200m.cmo", *m_factory);
+	m_objSkydome.LoadModel(L"Resources\\skydome.cmo");
+	m_objGround.LoadModel(L"Resources\\ground200m.cmo");
+
+	m_objPlayer.resize(PLAYER_PARTS_NUM);
+	m_objPlayer[PLAYER_PARTS_TANK].LoadModel(L"Resources\\tank.cmo");
+	m_objPlayer[PLAYER_PARTS_BATTERY].LoadModel(L"Resources\\battery.cmo");
+
+	// 親子関係の設定
+	m_objPlayer[PLAYER_PARTS_BATTERY].SetObjParent(&m_objPlayer[PLAYER_PARTS_TANK]);
+
 	m_modelSphere = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources\\sphere.cmo", *m_factory);
 	m_modelTeapot = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources\\teapot.cmo", *m_factory);
-	m_modelTank = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources\\tank.cmo", *m_factory);
 
 	m_angleSphere = 0.0f;
 	m_angleTeapot = 0.0f;
@@ -88,22 +95,26 @@ void Game::Initialize(HWND window, int width, int height)
 	//	m_worldGround[i] = Matrix::CreateTranslation(i % 200 - 100, 0, i / 200 - 100);
 	//}
 
-	for (int i = 0; i < 20; i++)
-	{
-		m_posTeapot[i].x = static_cast<float>(rand() % 100);
-		m_posTeapot[i].z = static_cast<float>(rand() % 100);
-		int angle = rand() % static_cast<int>(XM_2PI);
+	// ティーポット ///////////////////////////////////////////////
 
-		m_posTeapot[i].x = static_cast<float>(cos(angle)) * m_posTeapot[i].x;
-		m_posTeapot[i].z = static_cast<float>(sin(angle)) * m_posTeapot[i].z;
+	//for (int i = 0; i < 20; i++)
+	//{
+	//	m_posTeapot[i].x = static_cast<float>(rand() % 100);
+	//	m_posTeapot[i].z = static_cast<float>(rand() % 100);
+	//	int angle = rand() % static_cast<int>(XM_2PI);
 
-		Matrix transmat = Matrix::CreateTranslation(m_posTeapot[i].x, 0, m_posTeapot[i].z);
+	//	m_posTeapot[i].x = static_cast<float>(cos(angle)) * m_posTeapot[i].x;
+	//	m_posTeapot[i].z = static_cast<float>(sin(angle)) * m_posTeapot[i].z;
 
-		// 10秒で原点に向かうように計算する
-		m_moveTeapot[i] = Vector3(-m_posTeapot[i].x / 600.0f, 0.0f, -m_posTeapot[i].z / 600.0f);
+	//	Matrix transmat = Matrix::CreateTranslation(m_posTeapot[i].x, 0, m_posTeapot[i].z);
 
-		m_worldTeapot[i] = transmat;
-	}
+	//	// 10秒で原点に向かうように計算する
+	//	m_moveTeapot[i] = Vector3(-m_posTeapot[i].x / 600.0f, 0.0f, -m_posTeapot[i].z / 600.0f);
+
+	//	m_worldTeapot[i] = transmat;
+	//}
+
+	///////////////////////////////////////////////////////////////
 
 	m_time = 0.0f;
 }
@@ -209,7 +220,7 @@ void Game::Update(DX::StepTimer const& timer)
 	{
 		moveV = Vector3(0.0f, 0.0f, -0.1f);
 		// 移動ベクトルを回転させる
-		moveV = Vector3::TransformNormal(moveV, m_worldTank);
+		moveV = Vector3::TransformNormal(moveV, m_objPlayer[PLAYER_PARTS_TANK].GetWorld());
 
 		// 常に前進
 		//moveV = Vector3(sin(m_angleTank) * -0.1f, 0.0f, cos(m_angleTank) * -0.1f);
@@ -218,19 +229,17 @@ void Game::Update(DX::StepTimer const& timer)
 	{
 		moveV = Vector3(0.0f, 0.0f, 0.1f);
 		// 移動ベクトルを回転させる
-		moveV = Vector3::TransformNormal(moveV, m_worldTank);
+		moveV = Vector3::TransformNormal(moveV, m_objPlayer[PLAYER_PARTS_TANK].GetWorld());
 
 		// 常に後進
 		//moveV = Vector3(sin(m_angleTank) * 0.1f, 0.0f, cos(m_angleTank) * 0.1f);
 	}
 	m_posTank += moveV;
-		
-	Matrix transmat = Matrix::CreateTranslation(m_posTank);
-	Matrix rotmat = Matrix::CreateRotationY(m_angleTank);
-	m_worldTank = rotmat * transmat;
 
-	Matrix transmat2 = Matrix::CreateTranslation(Vector3(0.0f, 0.4f, 0.0f));
-	m_worldTank2 = transmat2 * m_worldTank;
+	m_objPlayer[PLAYER_PARTS_TANK].SetTranslation(m_posTank);
+	m_objPlayer[PLAYER_PARTS_TANK].SetRotation(Vector3(0.0f, m_angleTank, 0.0f));
+
+	m_objPlayer[PLAYER_PARTS_BATTERY].SetTranslation(Vector3(0.0f, 0.4f, 0.0f));
 	
 	////////////////////////////////////////////////////////////////
 	 
@@ -252,6 +261,18 @@ void Game::Update(DX::StepTimer const& timer)
 	m_camera->Update();
 	m_view = m_camera->GetView();
 	m_proj = m_camera->GetProjection();
+
+	////////////////////////////////////////////////////////////////
+
+	// 3Dオブジェクトの更新 ////////////////////////////////////////
+
+	m_objSkydome.Update();
+	m_objGround.Update();
+
+	for (std::vector<Obj3d>::iterator it = m_objPlayer.begin(); it != m_objPlayer.end() ; it++)
+	{
+		it->Update();
+	}
 
 	////////////////////////////////////////////////////////////////
 }
@@ -314,14 +335,14 @@ void Game::Render()
 	m_d3dContext->IASetInputLayout(m_inputLayout.Get());
 
 	// 天球の描画
-	m_modelSkydome->Draw(m_d3dContext.Get(), *m_states, m_world, m_view, m_proj);
+	m_objSkydome.Render();
 	
+	// 地面の描画
 	//for (int i = 0; i < 40000; i++)
 	//{
-	//	// 地面の描画
 	//	m_modelGround->Draw(m_d3dContext.Get(), *m_states, m_worldGround[i], m_view, m_proj);
 	//}
-	m_modelGround->Draw(m_d3dContext.Get(), *m_states, m_world, m_view, m_proj);
+	m_objGround.Render();
 	
 	//for (int i = 0; i < 20; i++)
 	//{
@@ -336,8 +357,10 @@ void Game::Render()
 	//}
 
 	// タンクの描画
-	m_modelTank->Draw(m_d3dContext.Get(), *m_states, m_worldTank, m_view, m_proj);
-	m_modelTank->Draw(m_d3dContext.Get(), *m_states, m_worldTank2, m_view, m_proj);
+	for (std::vector<Obj3d>::iterator it = m_objPlayer.begin(); it != m_objPlayer.end(); it++)
+	{
+		it->Render();
+	}
 
 	m_batch->Begin();
 
