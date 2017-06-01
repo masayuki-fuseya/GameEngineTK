@@ -29,6 +29,9 @@ public:
 	{
 		PLAYER_PARTS_TANK,
 		PLAYER_PARTS_BATTERY,
+		PLAYER_PARTS_STAR,
+		PLAYER_PARTS_SHIELD,
+		PLAYER_PARTS_DRILL,
 
 		PLAYER_PARTS_NUM	// 全体の数
 	};
@@ -114,11 +117,16 @@ private:
 	// 球用のワールド行列
 	DirectX::SimpleMath::Matrix m_worldSphere[20];
 	// 球用の角度
-	float m_angleSphere;
+	float m_sphereAngle;
 	// ティーポット用の角度
-	float m_angleTeapot;
+	float m_teapotAngle;
 	// タンク用の角度
-	float m_angleTank;
+	float m_tankAngle;
+	// 星用の角度
+	DirectX::SimpleMath::Vector3 m_starAngle;
+	// サインカーブ
+	float m_sinAngle;
+	float m_sinScale;
 	// ティーポットの座標
 	DirectX::SimpleMath::Vector3 m_posTeapot[20];
 	// ティーポットの移動用変数

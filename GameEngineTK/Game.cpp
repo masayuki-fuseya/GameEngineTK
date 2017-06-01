@@ -78,16 +78,25 @@ void Game::Initialize(HWND window, int width, int height)
 	m_objPlayer.resize(PLAYER_PARTS_NUM);
 	m_objPlayer[PLAYER_PARTS_TANK].LoadModel(L"Resources\\tank.cmo");
 	m_objPlayer[PLAYER_PARTS_BATTERY].LoadModel(L"Resources\\battery.cmo");
+	m_objPlayer[PLAYER_PARTS_STAR].LoadModel(L"Resources\\star.cmo");
+	m_objPlayer[PLAYER_PARTS_SHIELD].LoadModel(L"Resources\\shield.cmo");
+	m_objPlayer[PLAYER_PARTS_DRILL].LoadModel(L"Resources\\drill.cmo");
 
 	// 親子関係の設定
 	m_objPlayer[PLAYER_PARTS_BATTERY].SetObjParent(&m_objPlayer[PLAYER_PARTS_TANK]);
+	m_objPlayer[PLAYER_PARTS_STAR].SetObjParent(&m_objPlayer[PLAYER_PARTS_BATTERY]);
+	m_objPlayer[PLAYER_PARTS_SHIELD].SetObjParent(&m_objPlayer[PLAYER_PARTS_TANK]);
+	m_objPlayer[PLAYER_PARTS_DRILL].SetObjParent(&m_objPlayer[PLAYER_PARTS_TANK]);
 
 	m_modelSphere = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources\\sphere.cmo", *m_factory);
 	m_modelTeapot = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources\\teapot.cmo", *m_factory);
 
-	m_angleSphere = 0.0f;
-	m_angleTeapot = 0.0f;
-	m_angleTank = 0.0f;
+	m_sphereAngle = 0.0f;
+	m_teapotAngle = 0.0f;
+	m_tankAngle = 0.0f;
+	m_starAngle = Vector3::Zero;
+	m_sinAngle = 0.0f;
+	m_sinScale = 1.0f;
 
 	//for (int i = 0; i < 40000; i++)
 	//{
@@ -209,12 +218,27 @@ void Game::Update(DX::StepTimer const& timer)
 	if (m_keyboard->IsPressed(Keyboard::Keys::A))
 	{
 		// 左回転
-		m_angleTank += 0.02f;
+		//m_angleTank += 0.02f;
+		// 元となるオブジェクトを回転させる
+		float angle = m_objPlayer[0].GetRotation().y + 0.02f;
+		m_objPlayer[0].SetRotation(Vector3(0.0f, angle, 0.0f));
 	}
 	if (m_keyboard->IsPressed(Keyboard::Keys::D))
 	{
 		// 右回転
-		m_angleTank -= 0.02f;
+		//m_angleTank -= 0.02f;
+		float angle = m_objPlayer[0].GetRotation().y - 0.02f;
+		m_objPlayer[0].SetRotation(Vector3(0.0f, angle, 0.0f));
+	}
+	if (m_keyboard->IsPressed(Keyboard::Keys::Q))
+	{
+		float angle = m_objPlayer[PLAYER_PARTS_BATTERY].GetRotation().y + 0.02f;
+		m_objPlayer[PLAYER_PARTS_BATTERY].SetRotation(Vector3(0.0f, angle, 0.0f));
+	}
+	if (m_keyboard->IsPressed(Keyboard::Keys::E))
+	{
+		float angle = m_objPlayer[PLAYER_PARTS_BATTERY].GetRotation().y - 0.02f;
+		m_objPlayer[PLAYER_PARTS_BATTERY].SetRotation(Vector3(0.0f, angle, 0.0f));
 	}
 	if (m_keyboard->IsPressed(Keyboard::Keys::W))
 	{
@@ -234,12 +258,30 @@ void Game::Update(DX::StepTimer const& timer)
 		// 常に後進
 		//moveV = Vector3(sin(m_angleTank) * 0.1f, 0.0f, cos(m_angleTank) * 0.1f);
 	}
-	m_posTank += moveV;
+	Vector3 pos = m_objPlayer[0].GetTranslation();
+	pos += moveV;
 
-	m_objPlayer[PLAYER_PARTS_TANK].SetTranslation(m_posTank);
-	m_objPlayer[PLAYER_PARTS_TANK].SetRotation(Vector3(0.0f, m_angleTank, 0.0f));
+	// タンク
+	m_objPlayer[PLAYER_PARTS_TANK].SetTranslation(pos);
 
+	// 砲台
 	m_objPlayer[PLAYER_PARTS_BATTERY].SetTranslation(Vector3(0.0f, 0.4f, 0.0f));
+
+	// 星
+	//m_starAngle = m_objPlayer[PLAYER_PARTS_STAR].GetRotation() + Vector3(0.0f, 0.0f, 0.1f);
+	m_starAngle += Vector3(0.0f, 0.0f, 0.02f);
+	Vector3 starAngle = Vector3::Zero;
+	starAngle.z = (1 - cos(m_starAngle.z * XM_PI)) * XM_PI;
+	m_objPlayer[PLAYER_PARTS_STAR].SetRotation(starAngle);
+	m_objPlayer[PLAYER_PARTS_STAR].SetTranslation(Vector3(0.0f, 1.0f, 0.0f));
+
+	// 盾
+	m_sinAngle += 0.1f;
+	m_objPlayer[PLAYER_PARTS_SHIELD].SetRotation(Vector3(0.0f, m_sinAngle - XM_PIDIV2, 0.0f));
+	m_objPlayer[PLAYER_PARTS_SHIELD].SetTranslation(Vector3(sin(m_sinAngle), 0.8f, cos(m_sinAngle)));
+
+	// ドリル
+	m_objPlayer[PLAYER_PARTS_DRILL].SetTranslation(Vector3(0.0f, 0.2f, -0.7f));
 	
 	////////////////////////////////////////////////////////////////
 	 
@@ -254,9 +296,11 @@ void Game::Update(DX::StepTimer const& timer)
 	//m_camera->Update();
 	//m_view = m_camera->GetView();
 	//m_proj = m_camera->GetProjection();
-
-	m_camera->SetTargetPos(m_posTank);
-	m_camera->SetTargetAngle(m_angleTank);
+	
+	Vector3 target_pos = m_objPlayer[PLAYER_PARTS_TANK].GetTranslation();
+	m_camera->SetTargetPos(target_pos);
+	float target_angle = m_objPlayer[PLAYER_PARTS_TANK].GetRotation().y;
+	m_camera->SetTargetAngle(target_angle);
 
 	m_camera->Update();
 	m_view = m_camera->GetView();

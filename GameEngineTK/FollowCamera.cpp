@@ -84,7 +84,7 @@ void FollowCamera::Update()
 {
 	Vector3 eyePos, refPos;
 
-	if (m_keyboard->IsTriggered(DirectX::Keyboard::Keys::Space))
+	if (m_keyboard->IsTriggered(DirectX::Keyboard::Keys::C))
 	{
 		// ƒtƒ‰ƒO‚ğØ‚è‘Ö‚¦‚é
 		m_isTPSViewPoint = !m_isTPSViewPoint;
@@ -114,7 +114,7 @@ void FollowCamera::Update()
 	else
 	{
 		Vector3 up;
-		up = m_targetPos + Vector3(0.0f, 0.3f, 0.0f);
+		up = m_targetPos + Vector3(0.0f, 0.7f, 0.0f);
 
 		Vector3 cameraV(0.0f, 0.0f, -CAMERA_DISTANCE);
 
