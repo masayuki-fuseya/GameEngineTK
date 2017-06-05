@@ -67,8 +67,6 @@ Obj3d::Obj3d()
 //**********************************************************************
 void Obj3d::LoadModel(const wchar_t* fileName)
 {
-	//wchar_t* t = L"Resources\\" + fileName + L".cmo";
-
 	m_model = Model::CreateFromCMO(m_d3dDevice.Get(), fileName, *m_factory);
 }
 

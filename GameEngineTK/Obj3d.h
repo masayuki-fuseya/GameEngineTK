@@ -20,6 +20,7 @@
 #include <Model.h>
 #include <d3d11.h>
 #include <SimpleMath.h>
+#include <wchar.h>
 #include <Windows.h>
 #include <wrl.h>
 
@@ -52,8 +53,8 @@ public:
 	Obj3d();
 
 	void LoadModel(const wchar_t* fileName);
-	void Update();
-	void Render();
+	virtual void Update();
+	virtual void Render();
 
 	void SetScale(const DirectX::SimpleMath::Vector3& scale)
 	{

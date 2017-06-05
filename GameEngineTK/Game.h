@@ -8,6 +8,8 @@
 #include "DebugCamera.h"
 #include "Obj3d.h"
 #include "KeyboardUtil.h"
+#include "Player.h"
+#include "Enemy.h"
 #include "StepTimer.h"
 #include <CommonStates.h>
 #include <Effects.h>
@@ -25,16 +27,7 @@ class Game
 {
 public:
 
-	enum PLAYER_PARTS
-	{
-		PLAYER_PARTS_TANK,
-		PLAYER_PARTS_BATTERY,
-		PLAYER_PARTS_STAR,
-		PLAYER_PARTS_SHIELD,
-		PLAYER_PARTS_DRILL,
-
-		PLAYER_PARTS_NUM	// 全体の数
-	};
+	static const int ENEMY_NUM = 5;
 
 	Game();
 
@@ -110,7 +103,9 @@ private:
 	Obj3d m_objSkydome;
 	Obj3d m_objGround;
 	// 自機のオブジェクト
-	std::vector<Obj3d> m_objPlayer;
+	std::unique_ptr<Player> m_player;
+	// 敵オブジェクト
+	std::vector<Enemy> m_enemy;
 
 	std::unique_ptr<DirectX::Model> m_modelSphere;
 	std::unique_ptr<DirectX::Model> m_modelTeapot;
@@ -121,12 +116,12 @@ private:
 	// ティーポット用の角度
 	float m_teapotAngle;
 	// タンク用の角度
-	float m_tankAngle;
+	//float m_tankAngle;
 	// 星用の角度
-	DirectX::SimpleMath::Vector3 m_starAngle;
+	//DirectX::SimpleMath::Vector3 m_starAngle;
 	// サインカーブ
-	float m_sinAngle;
-	float m_sinScale;
+	//float m_sinAngle;
+	//float m_sinScale;
 	// ティーポットの座標
 	DirectX::SimpleMath::Vector3 m_posTeapot[20];
 	// ティーポットの移動用変数
@@ -136,10 +131,10 @@ private:
 	// 地面用のワールド行列
 	//DirectX::SimpleMath::Matrix m_worldGround[40000];
 	// タンクの座標
-	DirectX::SimpleMath::Vector3 m_posTank;
+	//DirectX::SimpleMath::Vector3 m_posTank;
 	// タンクのワールド行列
-	DirectX::SimpleMath::Matrix m_worldTank;
-	DirectX::SimpleMath::Matrix m_worldTank2;
+	//DirectX::SimpleMath::Matrix m_worldTank;
+	//DirectX::SimpleMath::Matrix m_worldTank2;
 	// キーボード
 	std::unique_ptr<KeyboardUtil> m_keyboard;
 	

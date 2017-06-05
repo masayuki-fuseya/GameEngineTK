@@ -75,28 +75,20 @@ void Game::Initialize(HWND window, int width, int height)
 	m_objSkydome.LoadModel(L"Resources\\skydome.cmo");
 	m_objGround.LoadModel(L"Resources\\ground200m.cmo");
 
-	m_objPlayer.resize(PLAYER_PARTS_NUM);
-	m_objPlayer[PLAYER_PARTS_TANK].LoadModel(L"Resources\\tank.cmo");
-	m_objPlayer[PLAYER_PARTS_BATTERY].LoadModel(L"Resources\\battery.cmo");
-	m_objPlayer[PLAYER_PARTS_STAR].LoadModel(L"Resources\\star.cmo");
-	m_objPlayer[PLAYER_PARTS_SHIELD].LoadModel(L"Resources\\shield.cmo");
-	m_objPlayer[PLAYER_PARTS_DRILL].LoadModel(L"Resources\\drill.cmo");
+	m_player = std::make_unique<Player>();
+	m_player->SetKeyboard(m_keyboard.get());
 
-	// 親子関係の設定
-	m_objPlayer[PLAYER_PARTS_BATTERY].SetObjParent(&m_objPlayer[PLAYER_PARTS_TANK]);
-	m_objPlayer[PLAYER_PARTS_STAR].SetObjParent(&m_objPlayer[PLAYER_PARTS_BATTERY]);
-	m_objPlayer[PLAYER_PARTS_SHIELD].SetObjParent(&m_objPlayer[PLAYER_PARTS_TANK]);
-	m_objPlayer[PLAYER_PARTS_DRILL].SetObjParent(&m_objPlayer[PLAYER_PARTS_TANK]);
+	m_enemy.resize(ENEMY_NUM);
+	//for (int i = 0; i < ENEMY_NUM; i++)
+	//{
+	//	m_enemy[i].i
+	//}
 
 	m_modelSphere = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources\\sphere.cmo", *m_factory);
 	m_modelTeapot = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources\\teapot.cmo", *m_factory);
 
 	m_sphereAngle = 0.0f;
 	m_teapotAngle = 0.0f;
-	m_tankAngle = 0.0f;
-	m_starAngle = Vector3::Zero;
-	m_sinAngle = 0.0f;
-	m_sinScale = 1.0f;
 
 	//for (int i = 0; i < 40000; i++)
 	//{
@@ -148,7 +140,9 @@ void Game::Update(DX::StepTimer const& timer)
     elapsedTime;
 	// ゲームの毎フレーム処理
 	m_debugCamera->Update();
-	
+
+	m_keyboard->Update();
+
 	// 球の回転 ////////////////////////////////////////////////////
 
 	//// 球のワールド行列の計算
@@ -210,80 +204,6 @@ void Game::Update(DX::StepTimer const& timer)
 	//}
 
 	////////////////////////////////////////////////////////////////
-
-	// タンク //////////////////////////////////////////////////////
-	m_keyboard->Update();
-
-	Vector3 moveV = Vector3::Zero;
-	if (m_keyboard->IsPressed(Keyboard::Keys::A))
-	{
-		// 左回転
-		//m_angleTank += 0.02f;
-		// 元となるオブジェクトを回転させる
-		float angle = m_objPlayer[0].GetRotation().y + 0.02f;
-		m_objPlayer[0].SetRotation(Vector3(0.0f, angle, 0.0f));
-	}
-	if (m_keyboard->IsPressed(Keyboard::Keys::D))
-	{
-		// 右回転
-		//m_angleTank -= 0.02f;
-		float angle = m_objPlayer[0].GetRotation().y - 0.02f;
-		m_objPlayer[0].SetRotation(Vector3(0.0f, angle, 0.0f));
-	}
-	if (m_keyboard->IsPressed(Keyboard::Keys::Q))
-	{
-		float angle = m_objPlayer[PLAYER_PARTS_BATTERY].GetRotation().y + 0.02f;
-		m_objPlayer[PLAYER_PARTS_BATTERY].SetRotation(Vector3(0.0f, angle, 0.0f));
-	}
-	if (m_keyboard->IsPressed(Keyboard::Keys::E))
-	{
-		float angle = m_objPlayer[PLAYER_PARTS_BATTERY].GetRotation().y - 0.02f;
-		m_objPlayer[PLAYER_PARTS_BATTERY].SetRotation(Vector3(0.0f, angle, 0.0f));
-	}
-	if (m_keyboard->IsPressed(Keyboard::Keys::W))
-	{
-		moveV = Vector3(0.0f, 0.0f, -0.1f);
-		// 移動ベクトルを回転させる
-		moveV = Vector3::TransformNormal(moveV, m_objPlayer[PLAYER_PARTS_TANK].GetWorld());
-
-		// 常に前進
-		//moveV = Vector3(sin(m_angleTank) * -0.1f, 0.0f, cos(m_angleTank) * -0.1f);
-	}
-	if (m_keyboard->IsPressed(Keyboard::Keys::S))
-	{
-		moveV = Vector3(0.0f, 0.0f, 0.1f);
-		// 移動ベクトルを回転させる
-		moveV = Vector3::TransformNormal(moveV, m_objPlayer[PLAYER_PARTS_TANK].GetWorld());
-
-		// 常に後進
-		//moveV = Vector3(sin(m_angleTank) * 0.1f, 0.0f, cos(m_angleTank) * 0.1f);
-	}
-	Vector3 pos = m_objPlayer[0].GetTranslation();
-	pos += moveV;
-
-	// タンク
-	m_objPlayer[PLAYER_PARTS_TANK].SetTranslation(pos);
-
-	// 砲台
-	m_objPlayer[PLAYER_PARTS_BATTERY].SetTranslation(Vector3(0.0f, 0.4f, 0.0f));
-
-	// 星
-	//m_starAngle = m_objPlayer[PLAYER_PARTS_STAR].GetRotation() + Vector3(0.0f, 0.0f, 0.1f);
-	m_starAngle += Vector3(0.0f, 0.0f, 0.02f);
-	Vector3 starAngle = Vector3::Zero;
-	starAngle.z = (1 - cos(m_starAngle.z * XM_PI)) * XM_PI;
-	m_objPlayer[PLAYER_PARTS_STAR].SetRotation(starAngle);
-	m_objPlayer[PLAYER_PARTS_STAR].SetTranslation(Vector3(0.0f, 1.0f, 0.0f));
-
-	// 盾
-	m_sinAngle += 0.1f;
-	m_objPlayer[PLAYER_PARTS_SHIELD].SetRotation(Vector3(0.0f, m_sinAngle - XM_PIDIV2, 0.0f));
-	m_objPlayer[PLAYER_PARTS_SHIELD].SetTranslation(Vector3(sin(m_sinAngle), 0.8f, cos(m_sinAngle)));
-
-	// ドリル
-	m_objPlayer[PLAYER_PARTS_DRILL].SetTranslation(Vector3(0.0f, 0.2f, -0.7f));
-	
-	////////////////////////////////////////////////////////////////
 	 
 	// カメラの位置の更新 //////////////////////////////////////////
 
@@ -297,9 +217,9 @@ void Game::Update(DX::StepTimer const& timer)
 	//m_view = m_camera->GetView();
 	//m_proj = m_camera->GetProjection();
 	
-	Vector3 target_pos = m_objPlayer[PLAYER_PARTS_TANK].GetTranslation();
+	Vector3 target_pos = m_player->GetTranslation();
 	m_camera->SetTargetPos(target_pos);
-	float target_angle = m_objPlayer[PLAYER_PARTS_TANK].GetRotation().y;
+	float target_angle = m_player->GetRotation().y;
 	m_camera->SetTargetAngle(target_angle);
 
 	m_camera->Update();
@@ -312,8 +232,8 @@ void Game::Update(DX::StepTimer const& timer)
 
 	m_objSkydome.Update();
 	m_objGround.Update();
-
-	for (std::vector<Obj3d>::iterator it = m_objPlayer.begin(); it != m_objPlayer.end() ; it++)
+	m_player->Update();
+	for (std::vector<Enemy>::iterator it = m_enemy.begin(); it != m_enemy.end(); it++)
 	{
 		it->Update();
 	}
@@ -400,8 +320,9 @@ void Game::Render()
 	//	m_modelTeapot->Draw(m_d3dContext.Get(), *m_states, m_worldTeapot[i], m_view, m_proj);
 	//}
 
-	// タンクの描画
-	for (std::vector<Obj3d>::iterator it = m_objPlayer.begin(); it != m_objPlayer.end(); it++)
+	m_player->Render();
+
+	for (std::vector<Enemy>::iterator it = m_enemy.begin(); it != m_enemy.end(); it++)
 	{
 		it->Render();
 	}
