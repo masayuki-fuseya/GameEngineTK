@@ -105,7 +105,7 @@ private:
 	// 自機のオブジェクト
 	std::unique_ptr<Player> m_player;
 	// 敵オブジェクト
-	std::vector<Enemy> m_enemy;
+	std::vector<std::unique_ptr<Enemy>> m_enemies;
 
 	std::unique_ptr<DirectX::Model> m_modelSphere;
 	std::unique_ptr<DirectX::Model> m_modelTeapot;

@@ -26,6 +26,7 @@ private:
 	float m_sinAngle;
 	float m_sinScale;
 	int m_timer;
+	// –Ú•WŠp“x
 	float m_distAngle;
 public:
 	enum PLAYER_PARTS
@@ -43,6 +44,19 @@ public:
 
 	void Update();
 	void Render();
+
+	const DirectX::SimpleMath::Vector3& GetRotation()
+	{
+		return m_parts[0].GetRotation();
+	}
+	void SetRotation(const DirectX::SimpleMath::Vector3& rotation)
+	{
+		m_parts[0].SetRotation(rotation);
+	}
+	void SetTranslation(const DirectX::SimpleMath::Vector3& translation)
+	{
+		m_parts[0].SetTranslation(translation);
+	}
 private:
 	float GetShortAngleRad(float targetAngle, float radian);
 	void MoveParts(DirectX::SimpleMath::Vector3 moveV);

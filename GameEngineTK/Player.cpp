@@ -48,6 +48,14 @@ Player::Player()
 	m_parts[PLAYER_PARTS_SHIELD].SetRotation(Vector3(0.0f, m_sinAngle - XM_PIDIV2, 0.0f));
 	m_parts[PLAYER_PARTS_SHIELD].SetTranslation(Vector3(sin(m_sinAngle), 0.8f, cos(m_sinAngle)));
 
+	// ÉhÉäÉã
+	m_parts[PLAYER_PARTS_DRILL].SetTranslation(Vector3(0.0f, 0.2f, -0.7f));
+
+	// êØ
+	Vector3 starAngle = Vector3::Zero;
+	starAngle.z = (1 - cos(m_starAngle.z * XM_PI)) * XM_PI;
+	m_parts[PLAYER_PARTS_STAR].SetRotation(starAngle);
+	m_parts[PLAYER_PARTS_STAR].SetTranslation(Vector3(0.0f, 1.0f, 0.0f));
 }
 
 
@@ -149,7 +157,6 @@ void Player::MoveParts(DirectX::SimpleMath::Vector3 moveV)
 	Vector3 drillScall(1.0f, 1.0f, 1.0f);
 	drillScall.z = (1 - cos(m_sinScale * XM_PI)) * 3.0f + 1.0f;
 	m_parts[PLAYER_PARTS_DRILL].SetScale(drillScall);
-	m_parts[PLAYER_PARTS_DRILL].SetTranslation(Vector3(0.0f, 0.2f, -0.7f));
 
 	// êØ
 	//m_starAngle = m_objPlayer[PLAYER_PARTS_STAR].GetRotation() + Vector3(0.0f, 0.0f, 0.1f);
@@ -157,5 +164,4 @@ void Player::MoveParts(DirectX::SimpleMath::Vector3 moveV)
 	Vector3 starAngle = Vector3::Zero;
 	starAngle.z = (1 - cos(m_starAngle.z * XM_PI)) * XM_PI;
 	m_parts[PLAYER_PARTS_STAR].SetRotation(starAngle);
-	m_parts[PLAYER_PARTS_STAR].SetTranslation(Vector3(0.0f, 1.0f, 0.0f));
 }

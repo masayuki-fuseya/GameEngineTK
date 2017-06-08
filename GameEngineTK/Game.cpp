@@ -39,8 +39,12 @@ void Game::Initialize(HWND window, int width, int height)
     */
 
 	m_keyboard = std::make_unique<KeyboardUtil>();
+
+	//m_player = std::make_unique<Player>();
+	//m_player->SetKeyboard(m_keyboard.get());
+
 	m_camera = std::make_unique<FollowCamera>(m_outputWidth, m_outputHeight);
-	// カメラにキーボードをセット
+	//m_camera->SetPlayer(m_player.get());
 	m_camera->SetKeyboard(m_keyboard.get());
 
 	m_debugCamera = std::make_unique<DebugCamera>(m_outputWidth, m_outputHeight);
@@ -78,11 +82,15 @@ void Game::Initialize(HWND window, int width, int height)
 	m_player = std::make_unique<Player>();
 	m_player->SetKeyboard(m_keyboard.get());
 
-	m_enemy.resize(ENEMY_NUM);
-	//for (int i = 0; i < ENEMY_NUM; i++)
-	//{
-	//	m_enemy[i].i
-	//}
+	m_camera->SetPlayer(m_player.get());
+
+	// 敵の生成
+	int enemyNum = rand() % ENEMY_NUM + 1;
+	m_enemies.resize(enemyNum);
+	for (int i = 0; i < enemyNum; i++)
+	{
+		m_enemies[i] = std::make_unique<Enemy>();
+	}
 
 	m_modelSphere = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources\\sphere.cmo", *m_factory);
 	m_modelTeapot = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources\\teapot.cmo", *m_factory);
@@ -210,9 +218,10 @@ void Game::Update(DX::StepTimer const& timer)
 	m_objSkydome.Update();
 	m_objGround.Update();
 	m_player->Update();
-	for (std::vector<Enemy>::iterator it = m_enemy.begin(); it != m_enemy.end(); it++)
+	for (std::vector<std::unique_ptr<Enemy>>::iterator it = m_enemies.begin(); it != m_enemies.end(); it++)
 	{
-		it->Update();
+		Enemy* enemy = it->get();
+		enemy->Update();
 	}
 
 	////////////////////////////////////////////////////////////////
@@ -228,9 +237,6 @@ void Game::Update(DX::StepTimer const& timer)
 	//m_camera->Update();
 	//m_view = m_camera->GetView();
 	//m_proj = m_camera->GetProjection();
-	
-	Vector3 target_pos = m_player->GetTranslation();
-	float target_angle = m_player->GetRotation().y;
 
 	m_camera->Update();
 	m_view = m_camera->GetView();
@@ -320,9 +326,10 @@ void Game::Render()
 
 	m_player->Render();
 
-	for (std::vector<Enemy>::iterator it = m_enemy.begin(); it != m_enemy.end(); it++)
+	for (std::vector<std::unique_ptr<Enemy>>::iterator it = m_enemies.begin(); it != m_enemies.end(); it++)
 	{
-		it->Render();
+		Enemy* enemy = it->get();
+		enemy->Render();
 	}
 
 	m_batch->Begin();

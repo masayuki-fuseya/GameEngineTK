@@ -96,8 +96,8 @@ void FollowCamera::Update()
 	}
 	
 	// ’Ç]‘ÎÛ‚ÌÝ’è
-	SetTargetPos(target_pos);
-	SetTargetAngle(target_angle);
+	SetTargetPos(m_player->GetTranslation());
+	SetTargetAngle(m_player->GetRotation().y);
 
 	if (m_isTPSViewPoint)
 	{

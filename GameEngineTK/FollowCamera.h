@@ -42,6 +42,10 @@ public:
 	void Update() override;
 	void SetTargetPos(const DirectX::SimpleMath::Vector3& targetPos);
 	void SetTargetAngle(const float targetAngle);
+	void SetPlayer(Player* player)
+	{
+		m_player = player;
+	}
 	void SetKeyboard(KeyboardUtil* keyboard);
 };
 
