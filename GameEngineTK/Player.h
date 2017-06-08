@@ -31,9 +31,9 @@ public:
 	{
 		PLAYER_PARTS_TANK,
 		PLAYER_PARTS_BATTERY,
-		PLAYER_PARTS_STAR,
 		PLAYER_PARTS_SHIELD,
 		PLAYER_PARTS_DRILL,
+		PLAYER_PARTS_STAR,
 
 		PLAYER_PARTS_NUM	// ëSëÃÇÃêî
 	};
@@ -43,7 +43,20 @@ public:
 	void Update();
 	void Render();
 
-	void SetKeyboard(KeyboardUtil* keyboard);
+	void SetKeyboard(KeyboardUtil* keyboard)
+	{
+		m_keyboard = keyboard;
+	}
+
+	const DirectX::SimpleMath::Vector3& GetRotation()
+	{
+		return m_parts[0].GetRotation();
+	}
+	const DirectX::SimpleMath::Vector3& GetTranslation()
+	{
+		return m_parts[0].GetTranslation();
+	}
+
 private:
 	void MoveParts(DirectX::SimpleMath::Vector3 moveV);
 };

@@ -94,6 +94,10 @@ void FollowCamera::Update()
 			InitializeTPS();
 		}
 	}
+	
+	// ’Ç]‘ÎÛ‚Ìİ’è
+	SetTargetPos(target_pos);
+	SetTargetAngle(target_angle);
 
 	if (m_isTPSViewPoint)
 	{

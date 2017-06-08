@@ -14,6 +14,7 @@
 // ヘッダファイルの読み込み ================================================
 #include "Camera.h"
 #include "KeyboardUtil.h"
+#include "Player.h"
 
 #include <SimpleMath.h>
 
@@ -25,6 +26,8 @@ private:
 	DirectX::SimpleMath::Vector3 m_targetPos;
 	// 追従対象の角度
 	float m_targetAngle;
+	// 追従対象
+	Player* m_player;
 	KeyboardUtil* m_keyboard;
 	bool m_isTPSViewPoint;		// true:TPS　false:FPS
 public:

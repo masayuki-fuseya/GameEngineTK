@@ -124,6 +124,9 @@ void Enemy::Render()
 //**********************************************************************
 float Enemy::GetShortAngleRad(float targetAngle, float radian)
 {
+
+
+
 	return 0.0f;
 }
 

@@ -205,6 +205,18 @@ void Game::Update(DX::StepTimer const& timer)
 
 	////////////////////////////////////////////////////////////////
 	 
+	// 3Dオブジェクトの更新 ////////////////////////////////////////
+
+	m_objSkydome.Update();
+	m_objGround.Update();
+	m_player->Update();
+	for (std::vector<Enemy>::iterator it = m_enemy.begin(); it != m_enemy.end(); it++)
+	{
+		it->Update();
+	}
+
+	////////////////////////////////////////////////////////////////
+
 	// カメラの位置の更新 //////////////////////////////////////////
 
 	// カメラが自機についてくる
@@ -218,25 +230,11 @@ void Game::Update(DX::StepTimer const& timer)
 	//m_proj = m_camera->GetProjection();
 	
 	Vector3 target_pos = m_player->GetTranslation();
-	m_camera->SetTargetPos(target_pos);
 	float target_angle = m_player->GetRotation().y;
-	m_camera->SetTargetAngle(target_angle);
 
 	m_camera->Update();
 	m_view = m_camera->GetView();
 	m_proj = m_camera->GetProjection();
-
-	////////////////////////////////////////////////////////////////
-
-	// 3Dオブジェクトの更新 ////////////////////////////////////////
-
-	m_objSkydome.Update();
-	m_objGround.Update();
-	m_player->Update();
-	for (std::vector<Enemy>::iterator it = m_enemy.begin(); it != m_enemy.end(); it++)
-	{
-		it->Update();
-	}
 
 	////////////////////////////////////////////////////////////////
 }
