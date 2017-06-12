@@ -24,8 +24,10 @@ using namespace DirectX::SimpleMath;
 Player::Player()
 	: m_keyboard(nullptr)
 	, m_starAngle(Vector3::Zero)
+	, m_batteryVel(Vector3::Zero)
 	, m_sinAngle(0.0f)
 	, m_sinScale(1.0f)
+	, m_shootFlag(false)
 {
 	m_parts.resize(PLAYER_PARTS_NUM);
 	m_parts[PLAYER_PARTS_TANK].LoadModel(L"Resources\\tank.cmo");
@@ -103,6 +105,17 @@ void Player::Update()
 		// 移動ベクトルを回転させる
 		moveV = Vector3::TransformNormal(moveV, m_parts[PLAYER_PARTS_TANK].GetWorld());
 	}
+	if (m_keyboard->IsTriggered(Keyboard::Keys::Space))
+	{
+		if (m_shootFlag)
+		{
+			ResetBattery();
+		}
+		else
+		{
+			ShootBattery();
+		}
+	}
 
 	// パーツを動かす
 	MoveParts(moveV);
@@ -133,6 +146,82 @@ void Player::Render()
 
 
 //**********************************************************************
+//!	@brief		砲台を発射する
+//!
+//!	@param[in]	なし
+//!
+//!	@return		なし
+//**********************************************************************
+void Player::ShootBattery()
+{
+	if (m_shootFlag)
+	{
+		return;
+	}
+
+	Matrix worldm = m_parts[PLAYER_PARTS_BATTERY].GetWorld();
+
+	Vector3 scale;
+	Quaternion quaternion;
+	Vector3 trans;
+
+	// スケール行列、回転行列、平行行列を取り出す
+	worldm.Decompose(scale, quaternion, trans);
+
+	// 親子関係を切り離して独立させる
+	m_parts[PLAYER_PARTS_BATTERY].SetObjParent(nullptr);
+	m_parts[PLAYER_PARTS_BATTERY].SetScale(scale);
+	m_parts[PLAYER_PARTS_BATTERY].SetQuaternion(quaternion);
+	m_parts[PLAYER_PARTS_BATTERY].SetTranslation(trans);
+
+	// 星の位置をそのままに
+	m_parts[PLAYER_PARTS_STAR].SetObjParent(&m_parts[PLAYER_PARTS_TANK]);
+	trans = Vector3(0.0f, 1.4f, 0.0f);
+	m_parts[PLAYER_PARTS_STAR].SetTranslation(trans);
+
+	m_batteryVel = Vector3(0.0f, 0.0f, -0.2f);
+	// ベクトルを回転
+	m_batteryVel = Vector3::Transform(m_batteryVel, quaternion);
+
+	m_shootFlag = true;
+}
+
+
+
+//**********************************************************************
+//!	@brief		砲台を元の位置に戻す
+//!
+//!	@param[in]	なし
+//!
+//!	@return		なし
+//**********************************************************************
+void Player::ResetBattery()
+{
+	if (!m_shootFlag)
+	{
+		return;
+	}
+
+	m_parts[PLAYER_PARTS_BATTERY].SetObjParent(&m_parts[PLAYER_PARTS_TANK]);
+	m_parts[PLAYER_PARTS_BATTERY].SetScale(Vector3(1.0f, 1.0f, 1.0f));
+	m_parts[PLAYER_PARTS_BATTERY].SetRotation(Vector3(0.0f, 0.0f, 0.0f));
+	m_parts[PLAYER_PARTS_BATTERY].SetTranslation(Vector3(0.0f, 0.4f, 0.0f));
+	// ワールド行列の更新
+	m_parts[PLAYER_PARTS_BATTERY].Update();
+
+	// 星の位置を修正
+	m_parts[PLAYER_PARTS_STAR].SetObjParent(&m_parts[PLAYER_PARTS_BATTERY]);
+	m_parts[PLAYER_PARTS_STAR].SetTranslation(Vector3(0.0f, 1.0f, 0.0f));
+
+	// 速度を初期化
+	m_batteryVel = Vector3(0.0f, 0.0f, 0.0f);
+
+	m_shootFlag = false;
+}
+
+
+
+//**********************************************************************
 //!	@brief		プレイヤーパーツを動かす
 //!
 //!	@param[in]	移動ベクトル
@@ -141,11 +230,15 @@ void Player::Render()
 //**********************************************************************
 void Player::MoveParts(DirectX::SimpleMath::Vector3 moveV)
 {
+	// タンク
 	Vector3 pos = m_parts[0].GetTranslation();
 	pos += moveV;
-
-	// タンク
 	m_parts[PLAYER_PARTS_TANK].SetTranslation(pos);
+
+	// 砲台
+	pos = m_parts[PLAYER_PARTS_BATTERY].GetTranslation();
+	pos += m_batteryVel;
+	m_parts[PLAYER_PARTS_BATTERY].SetTranslation(pos);
 
 	// 盾
 	m_sinAngle += 0.1f;

@@ -24,8 +24,11 @@ private:
 	std::vector<Obj3d> m_parts;
 	KeyboardUtil* m_keyboard;
 	DirectX::SimpleMath::Vector3 m_starAngle;
+	// ƒ^ƒ“ƒN‚Ì‘¬“x
+	DirectX::SimpleMath::Vector3 m_batteryVel;
 	float m_sinAngle;
 	float m_sinScale;
+	bool m_shootFlag;		// ”­ŽË’†‚©
 public:
 	enum PLAYER_PARTS
 	{
@@ -58,5 +61,7 @@ public:
 	}
 
 private:
+	void ShootBattery();
+	void ResetBattery();
 	void MoveParts(DirectX::SimpleMath::Vector3 moveV);
 };

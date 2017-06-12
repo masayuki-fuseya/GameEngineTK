@@ -41,14 +41,18 @@ private:
 	std::unique_ptr<DirectX::Model> m_model;
 	// スケール
 	DirectX::SimpleMath::Vector3 m_scale;
-	// 回転
+	// 回転(オイラー角)
 	DirectX::SimpleMath::Vector3 m_rotation;
+	// 回転(クォータニオン)
+	DirectX::SimpleMath::Quaternion m_quaternion;
 	// 平行移動
 	DirectX::SimpleMath::Vector3 m_translation;
 	// ワールド行列
 	DirectX::SimpleMath::Matrix m_world;
 	// 親のポインタ
 	Obj3d* m_pObjParent;
+	// 回転をクォータニオンで持つか
+	bool m_useQuaternion;
 public:
 	Obj3d();
 
@@ -60,9 +64,15 @@ public:
 	{
 		m_scale = scale;
 	}
+	void SetQuaternion(const DirectX::SimpleMath::Quaternion& quaternion)
+	{
+		m_quaternion = quaternion;
+		m_useQuaternion = true;
+	}
 	void SetRotation(const DirectX::SimpleMath::Vector3& rotation)
 	{
 		m_rotation = rotation;
+		m_useQuaternion = false;
 	}
 	void SetTranslation(const DirectX::SimpleMath::Vector3& translation)
 	{

@@ -53,6 +53,7 @@ void Obj3d::InitializeStatic(Camera* pCamera,
 Obj3d::Obj3d()
 	: m_scale(1.0f)
 	, m_pObjParent(nullptr)
+	, m_useQuaternion(false)
 {
 }
 
@@ -82,10 +83,22 @@ void Obj3d::LoadModel(const wchar_t* fileName)
 void Obj3d::Update()
 {
 	Matrix scalemat = Matrix::CreateScale(m_scale);
-	Matrix rotmatZ = Matrix::CreateRotationZ(m_rotation.z);
-	Matrix rotmatX = Matrix::CreateRotationX(m_rotation.x);
-	Matrix rotmatY = Matrix::CreateRotationY(m_rotation.y);
-	Matrix rotmat = rotmatZ * rotmatX * rotmatY;
+
+	Matrix rotmat;
+	if (m_useQuaternion)
+	{
+		// クォータニオンから回転行列を計算
+		rotmat = Matrix::CreateFromQuaternion(m_quaternion);
+	}
+	else
+	{
+		// オイラー角から回転行列を計算(Z-X-Y)
+		Matrix rotmatZ = Matrix::CreateRotationZ(m_rotation.z);
+		Matrix rotmatX = Matrix::CreateRotationX(m_rotation.x);
+		Matrix rotmatY = Matrix::CreateRotationY(m_rotation.y);
+		rotmat = rotmatZ * rotmatX * rotmatY;
+	}
+
 	Matrix transmat = Matrix::CreateTranslation(m_translation);
 
 	m_world = scalemat * rotmat * transmat;
