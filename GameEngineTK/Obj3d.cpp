@@ -15,11 +15,12 @@
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
 
-Camera* Obj3d::m_pCamera;
-std::unique_ptr<CommonStates> Obj3d::m_states;
-Microsoft::WRL::ComPtr<ID3D11Device> Obj3d::m_d3dDevice;
-Microsoft::WRL::ComPtr<ID3D11DeviceContext> Obj3d::m_d3dContext;
-std::unique_ptr<EffectFactory> Obj3d::m_factory;
+Camera* Obj3d::s_pCamera;
+std::unique_ptr<CommonStates> Obj3d::s_states;
+Microsoft::WRL::ComPtr<ID3D11Device> Obj3d::s_d3dDevice;
+Microsoft::WRL::ComPtr<ID3D11DeviceContext> Obj3d::s_d3dContext;
+std::unique_ptr<EffectFactory> Obj3d::s_factory;
+ID3D11BlendState* Obj3d::s_pBlendStateSubtract;
 
 
 //**********************************************************************
@@ -32,13 +33,35 @@ std::unique_ptr<EffectFactory> Obj3d::m_factory;
 void Obj3d::InitializeStatic(Camera* pCamera,
 	Microsoft::WRL::ComPtr<ID3D11Device> d3dDevice, Microsoft::WRL::ComPtr<ID3D11DeviceContext> d3dContext)
 {
-	m_pCamera = pCamera;
-	m_d3dDevice = d3dDevice;
-	m_d3dContext = d3dContext;
-	m_states = std::make_unique<CommonStates>(m_d3dDevice.Get());
-	m_factory = std::make_unique<EffectFactory>(m_d3dDevice.Get());
+	s_pCamera = pCamera;
+	s_d3dDevice = d3dDevice;
+	s_d3dContext = d3dContext;
+	s_states = std::make_unique<CommonStates>(s_d3dDevice.Get());
+	s_factory = std::make_unique<EffectFactory>(s_d3dDevice.Get());
 	//ファイルの読み込みパスを指定
-	m_factory->SetDirectory(L"Resources");
+	s_factory->SetDirectory(L"Resources");
+
+	// 減算描画用のブレンドステートを作成
+	D3D11_BLEND_DESC desc;
+	desc.AlphaToCoverageEnable = false;
+	desc.IndependentBlendEnable = false;
+	desc.RenderTarget[0].BlendEnable = true;
+	desc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
+	desc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
+	desc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_REV_SUBTRACT;
+	desc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
+	desc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_REV_SUBTRACT;
+	desc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+	HRESULT ret = s_d3dDevice->CreateBlendState(&desc, &s_pBlendStateSubtract);
+}
+
+
+
+void Obj3d::SetSubtractive()
+{
+	// 減算描画を設定
+	s_d3dContext->OMSetBlendState(s_pBlendStateSubtract, nullptr, 0xffffff);
 }
 
 
@@ -68,7 +91,7 @@ Obj3d::Obj3d()
 //**********************************************************************
 void Obj3d::LoadModel(const wchar_t* fileName)
 {
-	m_model = Model::CreateFromCMO(m_d3dDevice.Get(), fileName, *m_factory);
+	m_model = Model::CreateFromCMO(s_d3dDevice.Get(), fileName, *s_factory);
 }
 
 
@@ -122,6 +145,64 @@ void Obj3d::Render()
 {
 	if (m_model)
 	{
-		m_model->Draw(m_d3dContext.Get(), *m_states, m_world, m_pCamera->GetView(), m_pCamera->GetProjection());
+		m_model->Draw(s_d3dContext.Get(), *s_states, m_world, s_pCamera->GetView(), s_pCamera->GetProjection());
+	}
+}
+
+
+
+void Obj3d::DrawSubtractive()
+{
+	if (m_model)
+	{
+		assert(s_pCamera);
+		const Matrix& view = s_pCamera->GetView();
+		const Matrix& projection = s_pCamera->GetProjection();
+
+		assert(s_d3dContext);
+		assert(s_states);
+
+		// 減算描画用の設定関数を渡して描画
+		m_model->Draw(s_d3dContext.Get(), *s_states, m_world, view, projection, false, Obj3d::SetSubtractive);
+	}
+}
+
+
+
+void Obj3d::DisableLighting()
+{
+	if (m_model)
+	{
+		// モデル内の全メッシュ分回す
+		ModelMesh::Collection::const_iterator it_mesh = m_model->meshes.begin();
+		for (; it_mesh != m_model->meshes.end(); it_mesh++)
+		{
+			ModelMesh* modelmesh = it_mesh->get();
+			assert(modelmesh);
+
+			// メッシュ内の全メッシュパーツ分回す
+			std::vector<std::unique_ptr<ModelMeshPart>>::iterator it_meshpart = modelmesh->meshParts.begin();
+			for (; it_meshpart != modelmesh->meshParts.end(); it_meshpart++)
+			{
+				ModelMeshPart* meshpart = it_meshpart->get();
+				assert(meshpart);
+
+				// メッシュパーツにセットされたエフェクトをBasicEffectとして取得
+				std::shared_ptr<IEffect> ieff = meshpart->effect;
+				BasicEffect* eff = dynamic_cast<BasicEffect*>(ieff.get());
+				if (eff != nullptr)
+				{
+					// 自己発光を最大値に
+					eff->SetEmissiveColor(Vector3(1, 1, 1));
+
+					// エフェクトに含む全ての平行光源分について処理する
+					for (int i = 0; i < BasicEffect::MaxDirectionalLights; i++)
+					{
+						// ライトを無効にする
+						eff->SetLightEnabled(i, false);
+					}
+				}
+			}
+		}
 	}
 }

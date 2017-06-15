@@ -30,12 +30,15 @@ class Obj3d
 public:
 	static void InitializeStatic(Camera* pCamera, Microsoft::WRL::ComPtr<ID3D11Device> d3dDevice,
 		Microsoft::WRL::ComPtr<ID3D11DeviceContext> d3dContext);
+	// 減算描画設定をセット
+	static void SetSubtractive();
 private:
-	static Camera* m_pCamera;
-	static Microsoft::WRL::ComPtr<ID3D11Device>				m_d3dDevice;
-	static Microsoft::WRL::ComPtr<ID3D11DeviceContext>		m_d3dContext;
-	static std::unique_ptr<DirectX::CommonStates>			m_states;
-	static std::unique_ptr<DirectX::EffectFactory>			m_factory;
+	static Camera*											s_pCamera;
+	static Microsoft::WRL::ComPtr<ID3D11Device>				s_d3dDevice;
+	static Microsoft::WRL::ComPtr<ID3D11DeviceContext>		s_d3dContext;
+	static std::unique_ptr<DirectX::CommonStates>			s_states;
+	static std::unique_ptr<DirectX::EffectFactory>			s_factory;
+	static ID3D11BlendState*								s_pBlendStateSubtract;
 private:
 	// モデル
 	std::unique_ptr<DirectX::Model> m_model;
@@ -59,6 +62,11 @@ public:
 	void LoadModel(const wchar_t* fileName);
 	virtual void Update();
 	virtual void Render();
+
+	// 減算描画での描画（影用）
+	void DrawSubtractive();
+	// オブジェクトのライティングを無効にする
+	void DisableLighting();
 
 	void SetScale(const DirectX::SimpleMath::Vector3& scale)
 	{

@@ -28,6 +28,7 @@ Player::Player()
 	, m_sinAngle(0.0f)
 	, m_sinScale(1.0f)
 	, m_shootFlag(false)
+	, m_timer(0)
 {
 	m_parts.resize(PLAYER_PARTS_NUM);
 	m_parts[PLAYER_PARTS_TANK].LoadModel(L"Resources\\tank.cmo");
@@ -107,11 +108,7 @@ void Player::Update()
 	}
 	if (m_keyboard->IsTriggered(Keyboard::Keys::Space))
 	{
-		if (m_shootFlag)
-		{
-			ResetBattery();
-		}
-		else
+		if (m_timer == 0)
 		{
 			ShootBattery();
 		}
@@ -235,10 +232,19 @@ void Player::MoveParts(DirectX::SimpleMath::Vector3 moveV)
 	pos += moveV;
 	m_parts[PLAYER_PARTS_TANK].SetTranslation(pos);
 
-	// ñCë‰
-	pos = m_parts[PLAYER_PARTS_BATTERY].GetTranslation();
-	pos += m_batteryVel;
-	m_parts[PLAYER_PARTS_BATTERY].SetTranslation(pos);
+	if (m_shootFlag)
+	{
+		// ñCë‰
+		pos = m_parts[PLAYER_PARTS_BATTERY].GetTranslation();
+		pos += m_batteryVel;
+		m_parts[PLAYER_PARTS_BATTERY].SetTranslation(pos);
+		m_timer++;
+		if (m_timer == 120)
+		{
+			ResetBattery();
+			m_timer = 0;
+		}
+	}
 
 	// èÇ
 	m_sinAngle += 0.1f;

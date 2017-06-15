@@ -29,6 +29,7 @@ private:
 	float m_sinAngle;
 	float m_sinScale;
 	bool m_shootFlag;		// ”­ŽË’†‚©
+	int m_timer;
 public:
 	enum PLAYER_PARTS
 	{
