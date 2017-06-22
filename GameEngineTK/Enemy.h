@@ -14,6 +14,7 @@
 // ヘッダファイルの読み込み ================================================
 #include "Obj3d.h"
 #include "KeyboardUtil.h"
+#include "CollisionNode.h"
 
 #include <SimpleMath.h>
 #include <vector>
@@ -28,6 +29,7 @@ private:
 	int m_timer;
 	// 目標角度
 	float m_distAngle;
+	SphereNode m_collisionNodeBody;
 public:
 	enum PLAYER_PARTS
 	{
@@ -56,6 +58,11 @@ public:
 	void SetTranslation(const DirectX::SimpleMath::Vector3& translation)
 	{
 		m_parts[0].SetTranslation(translation);
+	}
+
+	const SphereNode& GetCollisionNodeBody()
+	{
+		return m_collisionNodeBody;
 	}
 private:
 	float GetShortAngleRad(float targetAngle, float radian);

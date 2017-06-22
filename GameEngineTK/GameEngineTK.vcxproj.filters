@@ -36,6 +36,8 @@
     <ClInclude Include="FollowCamera.h">
       <Filter>Camera</Filter>
     </ClInclude>
+    <ClInclude Include="CollisionNode.h" />
+    <ClInclude Include="ModelEffect.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -61,6 +63,8 @@
     <ClCompile Include="FollowCamera.cpp">
       <Filter>Camera</Filter>
     </ClCompile>
+    <ClCompile Include="CollisionNode.cpp" />
+    <ClCompile Include="ModelEffect.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />
@@ -107,6 +111,9 @@
       <Filter>Assets</Filter>
     </MeshContentTask>
     <MeshContentTask Include="Assets\drill.FBX">
+      <Filter>Assets</Filter>
+    </MeshContentTask>
+    <MeshContentTask Include="Assets\SphereNode.FBX">
       <Filter>Assets</Filter>
     </MeshContentTask>
   </ItemGroup>

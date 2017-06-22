@@ -14,6 +14,7 @@
 // ヘッダファイルの読み込み ================================================
 #include "Obj3d.h"
 #include "KeyboardUtil.h"
+#include "CollisionNode.h"
 
 #include <SimpleMath.h>
 #include <vector>
@@ -30,6 +31,7 @@ private:
 	float m_sinScale;
 	bool m_shootFlag;		// 発射中か
 	int m_timer;
+	SphereNode m_collisionNodeBattery;
 public:
 	enum PLAYER_PARTS
 	{
@@ -60,7 +62,10 @@ public:
 	{
 		return m_parts[0].GetTranslation();
 	}
-
+	const SphereNode& GetCollisionNodeBattery()
+	{
+		return m_collisionNodeBattery;
+	}
 private:
 	void ShootBattery();
 	void ResetBattery();

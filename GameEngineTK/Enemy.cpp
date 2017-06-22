@@ -61,6 +61,13 @@ Enemy::Enemy()
 	starAngle.z = (1 - cos(m_starAngle.z * XM_PI)) * XM_PI;
 	m_parts[PLAYER_PARTS_STAR].SetRotation(starAngle);
 	m_parts[PLAYER_PARTS_STAR].SetTranslation(Vector3(0.0f, 1.0f, 0.0f));
+
+	{
+		m_collisionNodeBody.Initialize();
+		m_collisionNodeBody.SetParent(&m_parts[PLAYER_PARTS_TANK]);
+		m_collisionNodeBody.SetTranslation(Vector3(0.0f, 0.4f, 0.0f));
+		m_collisionNodeBody.SetLocalRadius(0.7f);
+	}
 }
 
 
@@ -126,6 +133,8 @@ void Enemy::Update()
 	{
 		it->Obj3d::Update();
 	}
+
+	m_collisionNodeBody.Update();
 }
 
 
@@ -143,6 +152,8 @@ void Enemy::Render()
 	{
 		it->Obj3d::Render();
 	}
+
+	m_collisionNodeBody.Render();
 }
 
 

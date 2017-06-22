@@ -59,6 +59,13 @@ Player::Player()
 	starAngle.z = (1 - cos(m_starAngle.z * XM_PI)) * XM_PI;
 	m_parts[PLAYER_PARTS_STAR].SetRotation(starAngle);
 	m_parts[PLAYER_PARTS_STAR].SetTranslation(Vector3(0.0f, 1.0f, 0.0f));
+
+	{
+		m_collisionNodeBattery.Initialize();
+		m_collisionNodeBattery.SetParent(&m_parts[PLAYER_PARTS_BATTERY]);
+		m_collisionNodeBattery.SetTranslation(Vector3(0.0f, 0.0f, 0.0f));
+		m_collisionNodeBattery.SetLocalRadius(0.5f);
+	}
 }
 
 
@@ -121,6 +128,8 @@ void Player::Update()
 	{
 		it->Obj3d::Update();
 	}
+
+	m_collisionNodeBattery.Update();
 }
 
 
@@ -138,6 +147,8 @@ void Player::Render()
 	{
 		it->Obj3d::Render();
 	}
+
+	m_collisionNodeBattery.Render();
 }
 
 

@@ -79,6 +79,10 @@ void Game::Initialize(HWND window, int width, int height)
 	m_objSkydome.LoadModel(L"Resources\\skydome.cmo");
 	m_objGround.LoadModel(L"Resources\\ground200m.cmo");
 
+	// ライティングを無効にする
+	m_objSkydome.DisableLighting();
+	m_objGround.DisableLighting();
+
 	m_player = std::make_unique<Player>();
 	m_player->SetKeyboard(m_keyboard.get());
 
@@ -226,6 +230,31 @@ void Game::Update(DX::StepTimer const& timer)
 
 	////////////////////////////////////////////////////////////////
 
+	// 弾丸と敵の当たり判定 ////////////////////////////////////////
+
+	const Sphere& batterySphere = m_player->GetCollisionNodeBattery();
+
+	for (std::vector<std::unique_ptr<Enemy>>::iterator it = m_enemies.begin(); it != m_enemies.end(); )
+	{
+		Enemy* enemy = it->get();
+
+		const Sphere& enemySphere = enemy->GetCollisionNodeBody();
+
+		// 砲台と敵が当たっていたら
+		if (CheckSphere2Sphere(batterySphere, enemySphere))
+		{
+			// 敵を消す
+			// 消した次の要素のイテレータを返す
+			it = m_enemies.erase(it);
+		}
+		else
+		{
+			it++;
+		}
+	}
+
+	/// ////////////////////////////////////////////////////////////
+
 	// カメラの位置の更新 //////////////////////////////////////////
 
 	// カメラが自機についてくる
@@ -323,7 +352,7 @@ void Game::Render()
 	//	// ティーポットの描画
 	//	m_modelTeapot->Draw(m_d3dContext.Get(), *m_states, m_worldTeapot[i], m_view, m_proj);
 	//}
-
+	
 	m_player->Render();
 
 	for (std::vector<std::unique_ptr<Enemy>>::iterator it = m_enemies.begin(); it != m_enemies.end(); it++)
