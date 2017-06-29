@@ -25,6 +25,7 @@ void ModelEffectManager::Entry(
 	Vector3 start_scale, Vector3 end_scale // 拡縮・開始倍率と終了倍率
 )
 {
+	// 一時オブジェクト
 	ModelEffect effect;
 
 	effect.obj.LoadModel(filename);
@@ -39,13 +40,14 @@ void ModelEffectManager::Entry(
 	effect.frame = 0;
 	effect.num_frame = frame;
 
-	modelEffects.push_back(effect);
+	// 一時オブジェクトをリストに移す
+	modelEffects.push_back(std::move(effect));
 
 }
 
 void ModelEffectManager::Update()
 {
-	// モデルエフェクトを全て更新
+	// パーティクルを全て更新
 	std::list<ModelEffect>::iterator it;
 	for( it = modelEffects.begin(); it != modelEffects.end(); )
 	{
@@ -56,7 +58,7 @@ void ModelEffectManager::Update()
 		}
 		else
 		{
-			// 寿命に達したモデルエフェクトを解放する
+			// 寿命に達したパーティクルを解放する
 			it = modelEffects.erase(it);
 		}
 	}
@@ -64,7 +66,7 @@ void ModelEffectManager::Update()
 
 void ModelEffectManager::Draw()
 {
-	// モデルエフェクトを全て描画
+	// パーティクルを全て描画
 	std::list<ModelEffect>::iterator it;
 	for (it = modelEffects.begin(); it != modelEffects.end(); it++)
 	{

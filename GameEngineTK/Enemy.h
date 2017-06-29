@@ -29,7 +29,7 @@ private:
 	int m_timer;
 	// –Ú•WŠp“x
 	float m_distAngle;
-	SphereNode m_collisionNodeBody;
+	SphereNode m_collisionNodeTank;
 public:
 	enum PLAYER_PARTS
 	{
@@ -51,6 +51,10 @@ public:
 	{
 		return m_parts[0].GetRotation();
 	}
+	const DirectX::SimpleMath::Vector3& GetTranslation(int num)
+	{
+		return m_parts[num].GetTranslation();
+	}
 	void SetRotation(const DirectX::SimpleMath::Vector3& rotation)
 	{
 		m_parts[0].SetRotation(rotation);
@@ -60,9 +64,9 @@ public:
 		m_parts[0].SetTranslation(translation);
 	}
 
-	const SphereNode& GetCollisionNodeBody()
+	const SphereNode& GetCollisionNodeTank()
 	{
-		return m_collisionNodeBody;
+		return m_collisionNodeTank;
 	}
 private:
 	float GetShortAngleRad(float targetAngle, float radian);

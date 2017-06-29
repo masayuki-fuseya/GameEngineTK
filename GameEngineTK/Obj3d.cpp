@@ -21,6 +21,7 @@ Microsoft::WRL::ComPtr<ID3D11Device> Obj3d::s_d3dDevice;
 Microsoft::WRL::ComPtr<ID3D11DeviceContext> Obj3d::s_d3dContext;
 std::unique_ptr<EffectFactory> Obj3d::s_factory;
 ID3D11BlendState* Obj3d::s_pBlendStateSubtract;
+bool Obj3d::s_displayFlag;
 
 
 //**********************************************************************
@@ -54,6 +55,8 @@ void Obj3d::InitializeStatic(Camera* pCamera,
 	desc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_REV_SUBTRACT;
 	desc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 	HRESULT ret = s_d3dDevice->CreateBlendState(&desc, &s_pBlendStateSubtract);
+
+	s_displayFlag = false;
 }
 
 
@@ -85,6 +88,10 @@ Obj3d::Obj3d()
 	, m_useQuaternion(false)
 {
 }
+
+//Obj3d::~Obj3d()
+//{
+//}
 
 
 

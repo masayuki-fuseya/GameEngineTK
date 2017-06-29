@@ -140,4 +140,6 @@ private:
 	
 	// 3Ÿ•âŠÔ—p‚ÌŠÔ
 	float m_time;
+
+	std::unique_ptr<DirectX::Model> m_gameClear;
 };

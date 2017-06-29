@@ -39,6 +39,8 @@ private:
 	static std::unique_ptr<DirectX::CommonStates>			s_states;
 	static std::unique_ptr<DirectX::EffectFactory>			s_factory;
 	static ID3D11BlendState*								s_pBlendStateSubtract;
+protected:
+	static bool s_displayFlag;
 private:
 	// ƒ‚ƒfƒ‹
 	std::unique_ptr<DirectX::Model> m_model;
@@ -58,6 +60,7 @@ private:
 	bool m_useQuaternion;
 public:
 	Obj3d();
+	//virtual ~Obj3d();
 
 	void LoadModel(const wchar_t* fileName);
 	virtual void Update();
@@ -85,6 +88,10 @@ public:
 	void SetTranslation(const DirectX::SimpleMath::Vector3& translation)
 	{
 		m_translation = translation;
+	}
+	void SetWorld(const DirectX::SimpleMath::Matrix& world)
+	{
+		m_world = world;
 	}
 	void SetObjParent(Obj3d* pObjParent)
 	{

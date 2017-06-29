@@ -63,10 +63,10 @@ Enemy::Enemy()
 	m_parts[PLAYER_PARTS_STAR].SetTranslation(Vector3(0.0f, 1.0f, 0.0f));
 
 	{
-		m_collisionNodeBody.Initialize();
-		m_collisionNodeBody.SetParent(&m_parts[PLAYER_PARTS_TANK]);
-		m_collisionNodeBody.SetTranslation(Vector3(0.0f, 0.4f, 0.0f));
-		m_collisionNodeBody.SetLocalRadius(0.7f);
+		m_collisionNodeTank.Initialize();
+		m_collisionNodeTank.SetParent(&m_parts[PLAYER_PARTS_TANK]);
+		m_collisionNodeTank.SetTranslation(Vector3(0.0f, 0.4f, 0.0f));
+		m_collisionNodeTank.SetLocalRadius(0.7f);
 	}
 }
 
@@ -134,7 +134,7 @@ void Enemy::Update()
 		it->Obj3d::Update();
 	}
 
-	m_collisionNodeBody.Update();
+	m_collisionNodeTank.Update();
 }
 
 
@@ -153,7 +153,10 @@ void Enemy::Render()
 		it->Obj3d::Render();
 	}
 
-	m_collisionNodeBody.Render();
+	if (s_displayFlag)
+	{
+		m_collisionNodeTank.Render();
+	}
 }
 
 

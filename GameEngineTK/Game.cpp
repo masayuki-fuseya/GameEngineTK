@@ -4,6 +4,7 @@
 
 #include "pch.h"
 #include "Game.h"
+#include "ModelEffect.h"
 
 extern void ExitGame();
 
@@ -238,11 +239,16 @@ void Game::Update(DX::StepTimer const& timer)
 	{
 		Enemy* enemy = it->get();
 
-		const Sphere& enemySphere = enemy->GetCollisionNodeBody();
+		const Sphere& enemySphere = enemy->GetCollisionNodeTank();
 
 		// 砲台と敵が当たっていたら
 		if (CheckSphere2Sphere(batterySphere, enemySphere))
 		{
+			// エフェクトを出す
+			ModelEffectManager::getInstance()->Entry(L"Resources\\effect.cmo", 20,
+				enemy->GetTranslation(Enemy::PLAYER_PARTS_TANK) + Vector3(0.0f, 0.5f, 0.0f), Vector3::Zero, Vector3::Zero,
+				Vector3::Zero, Vector3::Zero, Vector3::Zero, Vector3(4.0f));
+
 			// 敵を消す
 			// 消した次の要素のイテレータを返す
 			it = m_enemies.erase(it);
@@ -253,7 +259,9 @@ void Game::Update(DX::StepTimer const& timer)
 		}
 	}
 
-	/// ////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////
+	
+	ModelEffectManager::getInstance()->Update();
 
 	// カメラの位置の更新 //////////////////////////////////////////
 
@@ -270,6 +278,15 @@ void Game::Update(DX::StepTimer const& timer)
 	m_camera->Update();
 	m_view = m_camera->GetView();
 	m_proj = m_camera->GetProjection();
+
+	////////////////////////////////////////////////////////////////
+
+	/// ゲームクリア ///////////////////////////////////////////////
+
+	if (m_enemies.size() == 0)
+	{
+		m_gameClear = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources\\gameclear.cmo", *m_factory);
+	}
 
 	////////////////////////////////////////////////////////////////
 }
@@ -361,7 +378,17 @@ void Game::Render()
 		enemy->Render();
 	}
 
-	m_batch->Begin();
+	// エフェクトの描画
+	ModelEffectManager::getInstance()->Draw();
+
+	if (m_gameClear)
+	{
+		Matrix transmat = Matrix::CreateTranslation(m_player->GetTranslation() + Vector3(0.0f, 3.0f, -5.0f));
+		Matrix rotmat = Matrix::CreateRotationY(m_player->GetRotation().y);
+		m_gameClear->Draw(m_d3dContext.Get(), *m_states, rotmat * transmat, m_view, m_proj);
+	}
+
+	//m_batch->Begin();
 
 	//m_batch->DrawLine(VertexPositionColor(Vector3(0.0f, 0.0f, 0.0f), Color(1.0f, 1.0f, 1.0f)),
 	//	VertexPositionColor(Vector3(100.0f, 80.0f, 0.0f), Color(1.0f, 1.0f, 1.0f)));
@@ -376,9 +403,9 @@ void Game::Render()
 
 	//m_batch->DrawTriangle(v1, v2, v3);
 
-	m_batch->DrawIndexed(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST, indices, 6, vertices, 4);
+	//m_batch->DrawIndexed(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST, indices, 6, vertices, 4);
 
-	m_batch->End();
+	//m_batch->End();
 
     Present();
 }

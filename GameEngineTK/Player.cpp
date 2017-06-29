@@ -120,6 +120,10 @@ void Player::Update()
 			ShootBattery();
 		}
 	}
+	if (m_keyboard->IsTriggered(Keyboard::Keys::D1))
+	{
+		s_displayFlag = !s_displayFlag;
+	}
 
 	// ƒp[ƒc‚ð“®‚©‚·
 	MoveParts(moveV);
@@ -148,7 +152,10 @@ void Player::Render()
 		it->Obj3d::Render();
 	}
 
-	m_collisionNodeBattery.Render();
+	if (s_displayFlag)
+	{
+		m_collisionNodeBattery.Render();
+	}
 }
 
 
