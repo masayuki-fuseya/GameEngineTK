@@ -130,7 +130,7 @@ void LandShape::Initialize(const wstring& filename_bin, const wstring& filename_
 		// フルパスに補完
 		wstring fullpath_cmo = L"Resources/" + filename_cmo + L".cmo";
 		// オブジェクト初期化
-		m_Obj.LoadModelFile(fullpath_cmo.c_str());
+		m_Obj.LoadModel(fullpath_cmo.c_str());
 	}
 }
 
@@ -139,9 +139,9 @@ void LandShape::Initialize(const wstring& filename_bin, const wstring& filename_
 //--------------------------------------------------------------------------------------
 void LandShape::Update()
 {
-	m_Obj.Calc();
+	m_Obj.Update();
 	// 逆行列を計算
-	const Matrix& localworld = m_Obj.GetLocalWorld();
+	const Matrix& localworld = m_Obj.GetWorld();
 	m_WorldLocal = localworld.Invert();
 }
 
@@ -153,16 +153,16 @@ void LandShape::Draw()
 	if (CollisionNode::GetDebugVisible() == false)
 	{
 		// モデル描画
-		m_Obj.Draw();
+		m_Obj.Render();
 	}
 	else if (m_pData)
 	{
 		// デバッグ描画
-		const Matrix& view = s_pCommon->m_pCamera->GetViewmat();
-		const Matrix& projection = s_pCommon->m_pCamera->GetProjmat();
+		const Matrix& view = s_pCommon->m_pCamera->GetView();
+		const Matrix& projection = s_pCommon->m_pCamera->GetProjection();
 
 		// 作成した行列をエフェクトにセット
-		s_pCommon->m_pEffect->SetWorld(m_Obj.GetLocalWorld());
+		s_pCommon->m_pEffect->SetWorld(m_Obj.GetWorld());
 		s_pCommon->m_pEffect->SetView(view);
 		s_pCommon->m_pEffect->SetProjection(projection);
 
@@ -233,9 +233,9 @@ bool LandShape::IntersectSphere(const Sphere& sphere, Vector3* reject)
 	if (scale <= 1.0e-10) return false;
 
 	// 球の中心点をワールド座標からモデル座標系に引き込む
-	localsphere.center = Vector3::Transform(sphere.center, m_WorldLocal);
+	localsphere.m_center = Vector3::Transform(sphere.m_center, m_WorldLocal);
 	// 半径をワールドをワールド座標系からモデル座標系に変換
-	localsphere.radius = sphere.radius / scale;
+	localsphere.m_radius = sphere.m_radius / scale;
 
 	// 三角形の数
 	int nTri = m_pData->m_Triangles.size();
@@ -252,7 +252,7 @@ bool LandShape::IntersectSphere(const Sphere& sphere, Vector3* reject)
 		{// ヒットした
 			hit = true;
 			// 衝突点から球の中心へのベクトル
-			Vector3 sub = localsphere.center - temp_inter;
+			Vector3 sub = localsphere.m_center - temp_inter;
 			// 球の中心が三角形にめりこんでいる距離を計算
 			temp_over_length = sub.Dot(-tri.Normal);
 
@@ -273,7 +273,7 @@ bool LandShape::IntersectSphere(const Sphere& sphere, Vector3* reject)
 		over_length *= scale;
 
 		// ワールド行列を取得
-		const Matrix& localworld = m_Obj.GetLocalWorld();
+		const Matrix& localworld = m_Obj.GetWorld();
 
 		// 排斥ベクトルの計算
 		if (reject != nullptr)
@@ -283,7 +283,7 @@ bool LandShape::IntersectSphere(const Sphere& sphere, Vector3* reject)
 			reject->Normalize();
 			// めり込み分だけ押し出すベクトルを計算
 			const float extra = 0.05f;
-			float reject_distance = sphere.radius + over_length + extra;
+			float reject_distance = sphere.m_radius + over_length + extra;
 			*reject = (*reject) * reject_distance;
 		}
 	}
@@ -360,7 +360,7 @@ bool LandShape::IntersectSegment(const Segment& segment, Vector3* inter)
 	if (hit && inter != nullptr)
 	{
 		// 衝突点の座標をモデル座標系からワールド座標系に変換
-		const Matrix& localworld = m_Obj.GetLocalWorld();
+		const Matrix& localworld = m_Obj.GetWorld();
 		*inter = Vector3::Transform(l_inter, localworld);
 	}
 

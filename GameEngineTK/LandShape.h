@@ -78,7 +78,7 @@ public:
 	// コンストラクタ
 	LandShape();
 	// 初期化
-	void Initialize(const wstring& filename_bin, const wstring& filename_cmo);
+	void Initialize(const std::wstring& filename_bin, const std::wstring& filename_cmo);
 	// ワールド行列の計算
 	void Update();
 	// デバッグ描画
