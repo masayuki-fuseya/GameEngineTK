@@ -11,6 +11,7 @@
 #include "Player.h"
 #include "Enemy.h"
 #include "StepTimer.h"
+#include "LandShape.h"
 #include <CommonStates.h>
 #include <Effects.h>
 #include <Model.h>
@@ -101,7 +102,8 @@ private:
 
 
 	Obj3d m_objSkydome;
-	Obj3d m_objGround;
+	//Obj3d m_objGround;
+	LandShape m_landShape;
 	// 自機のオブジェクト
 	std::unique_ptr<Player> m_player;
 	// 敵オブジェクト
@@ -109,6 +111,8 @@ private:
 
 	std::unique_ptr<DirectX::Model> m_modelSphere;
 	std::unique_ptr<DirectX::Model> m_modelTeapot;
+
+
 	// 球用のワールド行列
 	DirectX::SimpleMath::Matrix m_worldSphere[20];
 	// 球用の角度

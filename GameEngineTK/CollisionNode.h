@@ -24,6 +24,18 @@ protected:
 	// 親からのオフセット
 	DirectX::SimpleMath::Vector3 m_translation;
 public:
+	static bool GetDebugVisible()
+	{
+		return m_debugVisible;
+	}
+
+	static void SetDebugVisible(bool debugVisible)
+	{
+		m_debugVisible = debugVisible;
+	}
+protected:
+	static bool m_debugVisible;
+public:
 	virtual void Initialize() = 0;
 	virtual void Update() = 0;
 	virtual void Render() = 0;

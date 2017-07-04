@@ -13,6 +13,8 @@
 
 using namespace DirectX::SimpleMath;
 
+bool CollisionNode::m_debugVisible = false;
+
 //**********************************************************************
 //!	@brief		e‚ğİ’è‚·‚é
 //!

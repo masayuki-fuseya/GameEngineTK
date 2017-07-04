@@ -52,6 +52,13 @@ void Game::Initialize(HWND window, int width, int height)
 
 	Obj3d::InitializeStatic(m_camera.get(), m_d3dDevice, m_d3dContext);
 
+	// 地形の初期化
+	LandShapeCommonDef def;
+	def.pDevice = m_d3dDevice.Get();
+	def.pDeviceContext = m_d3dContext.Get();
+	def.pCamera = m_camera.get();
+	LandShape::InitializeCommon(def);
+
 	m_states = std::make_unique<CommonStates>(m_d3dDevice.Get());
 	//m_batch = std::make_unique<PrimitiveBatch<VertexPositionColor>>(m_d3dContext.Get());
 	m_batch = std::make_unique<PrimitiveBatch<VertexPositionNormal>>(m_d3dContext.Get());
@@ -78,11 +85,15 @@ void Game::Initialize(HWND window, int width, int height)
 
 	// モデルの読み込み
 	m_objSkydome.LoadModel(L"Resources\\skydome.cmo");
-	m_objGround.LoadModel(L"Resources\\ground200m.cmo");
+	//m_objGround.LoadModel(L"Resources\\ground200m.cmo");
+
+	// 地形の読み込み
+	m_landShape.Initialize(L"ground200m", L"ground200m");
 
 	// ライティングを無効にする
 	m_objSkydome.DisableLighting();
-	m_objGround.DisableLighting();
+	//m_objGround.DisableLighting();
+	m_landShape.DisableLighting();
 
 	m_player = std::make_unique<Player>();
 	m_player->SetKeyboard(m_keyboard.get());
@@ -221,7 +232,8 @@ void Game::Update(DX::StepTimer const& timer)
 	// 3Dオブジェクトの更新 ////////////////////////////////////////
 
 	m_objSkydome.Update();
-	m_objGround.Update();
+	//m_objGround.Update();
+	m_landShape.Update();
 	m_player->Update();
 	for (std::vector<std::unique_ptr<Enemy>>::iterator it = m_enemies.begin(); it != m_enemies.end(); it++)
 	{
@@ -356,7 +368,8 @@ void Game::Render()
 	//{
 	//	m_modelGround->Draw(m_d3dContext.Get(), *m_states, m_worldGround[i], m_view, m_proj);
 	//}
-	m_objGround.Render();
+	//m_objGround.Render();
+	m_landShape.Draw();
 	
 	//for (int i = 0; i < 20; i++)
 	//{
