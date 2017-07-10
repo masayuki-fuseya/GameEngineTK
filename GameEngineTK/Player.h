@@ -27,11 +27,23 @@ private:
 	DirectX::SimpleMath::Vector3 m_starAngle;
 	// タンクの速度
 	DirectX::SimpleMath::Vector3 m_batteryVel;
+	// 速度ベクトル
+	DirectX::SimpleMath::Vector3 m_velocity;
 	float m_sinAngle;
 	float m_sinScale;
 	bool m_shootFlag;		// 発射中か
+	bool m_isJump;
 	int m_timer;
+	// 当たり判定球
 	SphereNode m_collisionNodeBattery;
+	SphereNode m_collisionNodeTank;
+public:
+	// 重力加速度
+	const float GRAVITY_ACC = 0.03f;
+	// ジャンプの初速度
+	const float JUMP_SPEED_FIRST = 0.5f;
+	// ジャンプの最高速度
+	const float JUMP_SPEED_MAX = 0.3f;
 public:
 	enum PLAYER_PARTS
 	{
@@ -47,6 +59,7 @@ public:
 	Player();
 
 	void Update();
+	void Calc();
 	void Render();
 
 	void SetKeyboard(KeyboardUtil* keyboard)
@@ -66,8 +79,13 @@ public:
 	{
 		return m_collisionNodeBattery;
 	}
+	const SphereNode& GetCollisionNodeTank()
+	{
+		return m_collisionNodeTank;
+	}
 private:
 	void ShootBattery();
 	void ResetBattery();
+	void StartJump();
 	void MoveParts(DirectX::SimpleMath::Vector3 moveV);
 };

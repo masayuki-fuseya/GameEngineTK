@@ -25,9 +25,11 @@ Player::Player()
 	: m_keyboard(nullptr)
 	, m_starAngle(Vector3::Zero)
 	, m_batteryVel(Vector3::Zero)
+	, m_velocity(Vector3::Zero)
 	, m_sinAngle(0.0f)
 	, m_sinScale(1.0f)
 	, m_shootFlag(false)
+	, m_isJump(false)
 	, m_timer(0)
 {
 	m_parts.resize(PLAYER_PARTS_NUM);
@@ -65,6 +67,12 @@ Player::Player()
 		m_collisionNodeBattery.SetParent(&m_parts[PLAYER_PARTS_BATTERY]);
 		m_collisionNodeBattery.SetTranslation(Vector3(0.0f, 0.0f, 0.0f));
 		m_collisionNodeBattery.SetLocalRadius(0.5f);
+
+		m_collisionNodeTank.Initialize();
+		m_collisionNodeTank.SetParent(&m_parts[PLAYER_PARTS_TANK]);
+		m_collisionNodeTank.SetTranslation(Vector3(0.0f, 0.4f, 0.0f));
+		m_collisionNodeTank.SetLocalRadius(0.7f);
+
 	}
 }
 
@@ -113,7 +121,7 @@ void Player::Update()
 		// 移動ベクトルを回転させる
 		moveV = Vector3::TransformNormal(moveV, m_parts[PLAYER_PARTS_TANK].GetWorld());
 	}
-	if (m_keyboard->IsTriggered(Keyboard::Keys::Space))
+	if (m_keyboard->IsTriggered(Keyboard::Keys::Z))
 	{
 		if (m_timer == 0)
 		{
@@ -124,16 +132,45 @@ void Player::Update()
 	{
 		s_displayFlag = !s_displayFlag;
 	}
+	if (m_keyboard->IsTriggered(Keyboard::Keys::Space))
+	{
+		StartJump();
+	}
+
+	if (m_isJump)
+	{
+		// 重力をかける
+		m_velocity.y -= GRAVITY_ACC;
+		if (m_velocity.y <= -JUMP_SPEED_MAX)
+		{
+			m_velocity.y = -JUMP_SPEED_MAX;
+		}
+	}
 
 	// パーツを動かす
 	MoveParts(moveV);
 
+	Calc();
+}
+
+
+
+//**********************************************************************
+//!	@brief		行列更新
+//!
+//!	@param[in]	なし
+//!
+//!	@return		なし
+//**********************************************************************
+void Player::Calc()
+{
 	for (std::vector<Obj3d>::iterator it = m_parts.begin(); it != m_parts.end(); it++)
 	{
 		it->Obj3d::Update();
 	}
 
 	m_collisionNodeBattery.Update();
+	m_collisionNodeTank.Update();
 }
 
 
@@ -155,6 +192,7 @@ void Player::Render()
 	if (s_displayFlag)
 	{
 		m_collisionNodeBattery.Render();
+		m_collisionNodeTank.Render();
 	}
 }
 
@@ -232,6 +270,19 @@ void Player::ResetBattery()
 	m_batteryVel = Vector3(0.0f, 0.0f, 0.0f);
 
 	m_shootFlag = false;
+}
+
+
+
+//**********************************************************************
+//!	@brief		ジャンプし始める
+//!
+//!	@param[in]	なし
+//!
+//!	@return		なし
+//**********************************************************************
+void Player::StartJump()
+{
 }
 
 

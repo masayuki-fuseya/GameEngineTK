@@ -45,6 +45,7 @@ public:
 	Enemy();
 
 	void Update();
+	void Calc();
 	void Render();
 
 	const DirectX::SimpleMath::Vector3& GetRotation()

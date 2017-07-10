@@ -129,12 +129,26 @@ void Enemy::Update()
 	// パーツを動かす
 	MoveParts(moveV);
 
+	Calc();
+
+	m_collisionNodeTank.Update();
+}
+
+
+
+//**********************************************************************
+//!	@brief		行列更新
+//!
+//!	@param[in]	なし
+//!
+//!	@return		なし
+//**********************************************************************
+void Enemy::Calc()
+{
 	for (std::vector<Obj3d>::iterator it = m_parts.begin(); it != m_parts.end(); it++)
 	{
 		it->Obj3d::Update();
 	}
-
-	m_collisionNodeTank.Update();
 }
 
 

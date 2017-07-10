@@ -293,6 +293,58 @@ void Game::Update(DX::StepTimer const& timer)
 
 	////////////////////////////////////////////////////////////////
 
+	// 自機の地形へのめり込みを検出して押し出す ////////////////////
+
+	{
+		Sphere sphere = m_player->GetCollisionNodeTank();
+		Vector3 trans = m_player->GetTranslation();
+		// 当たり判定球の中心から自機の足元へのベクトル
+		Vector3 sphere2player = trans - sphere.m_center;
+
+		// 排斥ベクトル
+		Vector3 reject;
+
+		// 地形と球の当たり判定
+		if (m_landShape.IntersectSphere(sphere, &reject))
+		{
+			// めり込み分押し出す
+			sphere.m_center += reject;
+		}
+
+		// 押し出された座標をセット
+		m_player->SetTranslation(sphere.m_center += sphere2player);
+
+		// ワールド行列だけずらす
+		m_player->Calc();
+	}
+
+	////////////////////////////////////////////////////////////////
+
+	// 地面に乗る処理 //////////////////////////////////////////////
+
+	{
+		// プレイヤーの上から下へのベクトル
+		Segment playerSegment;
+		Vector3 trans = m_player->GetTranslation();
+		playerSegment.m_start = trans + Vector3(0.0f, 1.0f, 0.0f);
+		// 少し長めに判定を取る
+		playerSegment.m_end = trans + Vector3(0.0f, -0.5f, 0.0f);
+
+		Vector3 inter;
+
+		// 地形と線分の当たり判定
+		if (m_landShape.IntersectSegment(playerSegment, &inter))
+		{
+			trans.y = inter.y;
+		}
+
+		m_player->SetTranslation(trans);
+
+		m_player->Calc();
+	}
+
+	////////////////////////////////////////////////////////////////
+
 	/// ゲームクリア ///////////////////////////////////////////////
 
 	if (m_enemies.size() == 0)
