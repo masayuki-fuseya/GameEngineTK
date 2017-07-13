@@ -323,24 +323,33 @@ void Game::Update(DX::StepTimer const& timer)
 	// 地面に乗る処理 //////////////////////////////////////////////
 
 	{
-		// プレイヤーの上から下へのベクトル
-		Segment playerSegment;
-		Vector3 trans = m_player->GetTranslation();
-		playerSegment.m_start = trans + Vector3(0.0f, 1.0f, 0.0f);
-		// 少し長めに判定を取る
-		playerSegment.m_end = trans + Vector3(0.0f, -0.5f, 0.0f);
-
-		Vector3 inter;
-
-		// 地形と線分の当たり判定
-		if (m_landShape.IntersectSegment(playerSegment, &inter))
+		// 落下中か着地中のみ
+		if (m_player->GetVelocity().y <= 0.0f)
 		{
-			trans.y = inter.y;
+			// プレイヤーの上から下へのベクトル
+			Segment playerSegment;
+			Vector3 trans = m_player->GetTranslation();
+			playerSegment.m_start = trans + Vector3(0.0f, 1.0f, 0.0f);
+			// 少し長めに判定を取る
+			playerSegment.m_end = trans + Vector3(0.0f, -0.5f, 0.0f);
+
+			Vector3 inter;
+
+			// 地形と線分の当たり判定
+			if (m_landShape.IntersectSegment(playerSegment, &inter))
+			{
+				trans.y = inter.y;
+				m_player->SetTranslation(trans);
+
+				m_player->Calc();
+
+				m_player->StopJump();
+			}
+			else
+			{
+				m_player->StartFall();
+			}
 		}
-
-		m_player->SetTranslation(trans);
-
-		m_player->Calc();
 	}
 
 	////////////////////////////////////////////////////////////////

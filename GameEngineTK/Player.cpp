@@ -147,6 +147,10 @@ void Player::Update()
 		}
 	}
 
+	Vector3 trans = GetTranslation();
+	trans += m_velocity;
+	SetTranslation(trans);
+
 	// パーツを動かす
 	MoveParts(moveV);
 
@@ -194,6 +198,57 @@ void Player::Render()
 		m_collisionNodeBattery.Render();
 		m_collisionNodeTank.Render();
 	}
+}
+
+
+
+//**********************************************************************
+//!	@brief		ジャンプし始める
+//!
+//!	@param[in]	なし
+//!
+//!	@return		なし
+//**********************************************************************
+void Player::StartJump()
+{
+	if (!m_isJump)
+	{
+		m_velocity.y = JUMP_SPEED_FIRST;
+		m_isJump = true;
+	}
+}
+
+
+
+//**********************************************************************
+//!	@brief		落下し始める
+//!
+//!	@param[in]	なし
+//!
+//!	@return		なし
+//**********************************************************************
+void Player::StartFall()
+{
+	if (!m_isJump)
+	{
+		m_velocity.y = 0.0f;
+		m_isJump = true;
+	}
+}
+
+
+
+//**********************************************************************
+//!	@brief		ジャンプを終了する
+//!
+//!	@param[in]	なし
+//!
+//!	@return		なし
+//**********************************************************************
+void Player::StopJump()
+{
+	m_isJump = false;
+	m_velocity = Vector3::Zero;
 }
 
 
@@ -270,19 +325,6 @@ void Player::ResetBattery()
 	m_batteryVel = Vector3(0.0f, 0.0f, 0.0f);
 
 	m_shootFlag = false;
-}
-
-
-
-//**********************************************************************
-//!	@brief		ジャンプし始める
-//!
-//!	@param[in]	なし
-//!
-//!	@return		なし
-//**********************************************************************
-void Player::StartJump()
-{
 }
 
 

@@ -66,6 +66,10 @@ public:
 	{
 		m_keyboard = keyboard;
 	}
+	void SetTranslation(DirectX::SimpleMath::Vector3& translation)
+	{
+		m_parts[0].SetTranslation(translation);
+	}
 
 	const DirectX::SimpleMath::Vector3& GetRotation()
 	{
@@ -83,9 +87,16 @@ public:
 	{
 		return m_collisionNodeTank;
 	}
+	const DirectX::SimpleMath::Vector3& GetVelocity()
+	{
+		return m_velocity;
+	}
+
+	void StartJump();
+	void StartFall();
+	void StopJump();
 private:
 	void ShootBattery();
 	void ResetBattery();
-	void StartJump();
 	void MoveParts(DirectX::SimpleMath::Vector3 moveV);
 };
